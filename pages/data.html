@@ -373,7 +373,7 @@
                     if(response.status === 'success') {
                         const statusDiv = $('#status');
                         // Destroy existing DataTable if it exists
-                        if ($..fn.DataTable.isDataTable('#data-table table')) {
+                        if ($.fn.DataTable.isDataTable('#data-table table')) {
                             $('#data-table table').DataTable().destroy();
                         }
                         // Clear existing charts
