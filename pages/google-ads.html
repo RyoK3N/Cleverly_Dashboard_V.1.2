@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head>
-    <title>Cleverly Sales Dashboard</title>
+    <title>Google Ads Analysis - Cleverly Sales Dashboard</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/fixedfooter/3.3.1/css/fixedFooter.dataTables.min.css">
@@ -30,20 +30,6 @@
             color: white;
             text-align: center;
         }
-        .chart-card {
-            margin-bottom: 1rem;
-            display: flex;
-            flex-direction: column;
-        }
-        .chart-container {
-            position: relative;
-            height: 300px;
-            width: 100%;
-        }
-        .form-inline .form-control {
-            width: auto;
-            margin-right: 10px;
-        }
         .table-sm { font-size: 14px; }
         .fade-in {
             animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
@@ -52,7 +38,7 @@
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        #data-table {
+        .data-table {
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             margin-top: 20px;
         }
@@ -69,7 +55,7 @@
             font-size: 13px;
         }
         .table th {
-            background: linear-gradient(135deg, #007bff, #0056b3);
+            background: linear-gradient(135deg, #28a745, #20c997);
             color: white;
             padding: 12px 8px;
             font-weight: 600;
@@ -94,62 +80,29 @@
             transform: scale(1.01);
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        .table tbody tr:last-child {
-            background-color: #e3f2fd !important;
-            font-weight: bold;
-            border-top: 2px solid #007bff;
-        }
-        .table tbody tr:last-child:hover {
-            background-color: #bbdefb !important;
-        }
         .table-responsive {
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        .dataTables_wrapper .dataTables_filter input {
-            border-radius: 20px;
-            border: 1px solid #ced4da;
-            padding: 8px 15px;
-            margin-left: 10px;
-        }
-        .dataTables_wrapper .dataTables_length select {
-            border-radius: 5px;
-            border: 1px solid #ced4da;
-            padding: 5px 10px;
-        }
-        .dataTables_wrapper .dataTables_info {
-            color: #6c757d;
-            font-size: 14px;
-        }
-        .dataTables_wrapper .dataTables_paginate .paginate_button {
-            border-radius: 5px;
-            margin: 0 2px;
-            padding: 8px 12px;
-        }
-        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-            background: #007bff !important;
-            border-color: #007bff !important;
-            color: white !important;
         }
         .numeric-cell {
             text-align: right;
             font-family: 'Courier New', monospace;
         }
-        .percentage-cell {
-            text-align: right;
-            font-family: 'Courier New', monospace;
+        .campaign-header {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
         }
-        .owner-cell {
-            font-weight: 600;
-            color: #495057;
+        .content-header {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+            color: white;
         }
     </style>
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
         <div class="container-lg">
-            <a class="navbar-brand" href="#">Cleverly Sales Dashboard</a>
+            <a class="navbar-brand" href="#">Google Ads Analysis</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse"
                     data-target="#navbarSupportedContent"
                     aria-controls="navbarSupportedContent"
@@ -159,8 +112,8 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ml-auto">
-                    <li class="nav-item active">
-                        <a class="nav-link" href="/dashboard">Dashboard <span class="sr-only">(current)</span></a>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">Dashboard</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/chatbot">Chatbot</a>
@@ -171,6 +124,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/data">Cold-Email</a>
                     </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/google-ads">Google Ads <span class="sr-only">(current)</span></a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/logout">Logout</a>
                     </li>
@@ -180,15 +136,13 @@
     </nav>
 
     <div class="container-lg mt-4">
-        <!-- 1) Data Controls to fetch Monday.com data and filter locally -->
+        <!-- Data Controls -->
         <div class="row">
             <div class="col-12">
                 <div class="card mb-4">
                     <div class="card-body">
-                        <h3 class="card-title">Data Controls</h3>
-                        <!-- <div class="mb-3">
-                            <button id="fetch-btn" class="btn btn-primary">Fetch Data</button>
-                        </div> -->
+                        <h3 class="card-title">Google Ads Analysis Controls</h3>
+                        <p class="text-muted">Analyze leads from Google Ads campaigns by UTM Campaign and UTM Content</p>
                         <form id="filter-form">
                             <div class="form-row">
                                 <div class="form-group col-md-3">
@@ -208,7 +162,7 @@
                                     </select>
                                 </div>
                                 <div class="form-group col-md-3 align-self-end">
-                                    <button type="submit" class="btn btn-success btn-block">Apply Filter</button>
+                                    <button type="submit" class="btn btn-success btn-block">Analyze Google Ads</button>
                                 </div>
                             </div>
                         </form>
@@ -217,71 +171,41 @@
             </div>
         </div>
 
+        <!-- Results Section -->
         <div class="row">
             <div class="col-12">
                 <div class="card mb-4">
                     <div class="card-body">
-                        <h3 class="card-title">Results</h3>
-                        <div class="form-group mb-3">
-                            <label>Select Owners to Display:</label>
-                            <div id="owners-checkbox-container" class="border p-3 rounded" style="max-height: 200px; overflow-y: auto;">
-                            </div>
-                            <button id="apply-owners-filter" class="btn btn-primary mt-2">Apply Owner Filter</button>
-                        </div>
+                        <h3 class="card-title">Analysis Results</h3>
                         <div id="status"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Charts Section -->
-        <div class="row" id="charts-container" style="display: none;">
+        <!-- Campaign Analysis Table -->
+        <div class="row" id="campaign-results" style="display: none;">
             <div class="col-12">
                 <div class="card mb-4">
+                    <div class="card-header campaign-header">
+                        <h4 class="mb-0">Table 1: Analysis by UTM Campaign</h4>
+                    </div>
                     <div class="card-body">
-                        <h3 class="card-title">Performance Charts</h3>
-                        <div class="row">
-                            <div class="col-md-6 mb-4">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h5 class="card-title">New Calls Booked by Owner</h5>
-                                        <canvas id="newCallsChart"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-4">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Sales Calls Taken by Owner</h5>
-                                        <canvas id="salesCallsChart"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-4">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Revenue per Call by Owner</h5>
-                                        <canvas id="revenuePerCallChart"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-4">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Closed Revenue by Owner</h5>
-                                        <canvas id="closedRevenueChart"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-4">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Close Rate by Owner</h5>
-                                        <canvas id="closeRateChart"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <div class="table-responsive data-table" id="campaign-table"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Analysis Table -->
+        <div class="row" id="content-results" style="display: none;">
+            <div class="col-12">
+                <div class="card mb-4">
+                    <div class="card-header content-header">
+                        <h4 class="mb-0">Table 2: Analysis by UTM Content</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive data-table" id="content-table"></div>
                     </div>
                 </div>
             </div>
@@ -320,79 +244,84 @@
             $('#loading-overlay').fadeOut();
         }
 
-        function populateOwners() {
-            $.get('/get_owners', function(data) {
-                const container = $('#owners-checkbox-container');
-                container.empty();
-                data.owners.forEach(owner => {
-                    container.append(`
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input owner-checkbox" id="owner-${owner}" value="${owner}">
-                            <label class="custom-control-label" for="owner-${owner}">${owner}</label>
-                        </div>
-                    `);
-                });
+        function initializeDataTable(tableId, data) {
+            // Destroy existing DataTable if it exists
+            if ($.fn.DataTable.isDataTable(`#${tableId} table`)) {
+                $(`#${tableId} table`).DataTable().destroy();
+            }
+
+            // Initialize new DataTable
+            const table = $(`#${tableId} table`).DataTable({
+                scrollX: true,
+                scrollY: '50vh',
+                scrollCollapse: true,
+                paging: true,
+                pageLength: 25,
+                lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+                fixedHeader: true,
+                dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+                     '<"row"<"col-sm-12"B>>' +
+                     '<"row"<"col-sm-12"tr>>' +
+                     '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+                buttons: [
+                    {
+                        extend: 'copy',
+                        className: 'btn btn-sm btn-outline-primary'
+                    },
+                    {
+                        extend: 'csv',
+                        className: 'btn btn-sm btn-outline-success'
+                    },
+                    {
+                        extend: 'excel',
+                        className: 'btn btn-sm btn-outline-success'
+                    },
+                    {
+                        extend: 'pdf',
+                        className: 'btn btn-sm btn-outline-danger'
+                    },
+                    {
+                        extend: 'print',
+                        className: 'btn btn-sm btn-outline-info'
+                    }
+                ],
+                order: [[1, 'desc']], // Sort by Count column descending
+                language: {
+                    search: "",
+                    searchPlaceholder: "Search...",
+                    lengthMenu: "Show _MENU_ entries per page",
+                    info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                    paginate: {
+                        first: "First",
+                        last: "Last",
+                        next: "Next",
+                        previous: "Previous"
+                    }
+                },
+                columnDefs: [
+                    {
+                        targets: '_all',
+                        render: function(data, type, row, meta) {
+                            if (type === 'display' && typeof data === 'number') {
+                                // Check if it's a dollar amount
+                                if (meta.settings.aoColumns[meta.col].sTitle.includes('Value')) {
+                                    return '<span class="numeric-cell">$' + data.toLocaleString() + '</span>';
+                                }
+                                // Regular number
+                                else {
+                                    return '<span class="numeric-cell">' + data.toLocaleString() + '</span>';
+                                }
+                            }
+                            return data;
+                        }
+                    }
+                ]
             });
+
+            return table;
         }
 
         $(document).ready(function() {
-            // Populate owners dropdown when page loads
-            populateOwners();
-
-            // Handle owner filter apply button
-            $('#apply-owners-filter').click(function() {
-                applyFilters();
-            });
-
-            // Handle Calendly data fetch button
-            $('#download-calendly-button').click(function() {
-                showLoading('Fetching Calendly data...');
-
-                fetch('/fetch-calendly-data', {
-                    method: 'POST'
-                })
-                .then(response => response.json())
-                .then(data => {
-                    const statusDiv = $('#status');
-                    if (data.status === 'success') {
-                        statusDiv.html(`<div class="alert alert-success">${data.message}</div>`);
-                        console.log('Calendly fetch output:', data.output);
-                    } else {
-                        statusDiv.html(`<div class="alert alert-danger">Error: ${data.message}</div>`);
-                    }
-                })
-                .catch(error => {
-                    $('#status').html(`<div class="alert alert-danger">Error: Failed to fetch Calendly data - ${error.message}</div>`);
-                })
-                .finally(() => {
-                    hideLoading();
-                });
-            });
-
-            // Populate owners again when new data is fetched
-            $('#fetch-btn').click(function() {
-                showLoading('Fetching data...');
-
-                fetch('/fetch-data', {
-                    method: 'POST'
-                })
-                .then(response => response.json())
-                .then(data => {
-                    const statusDiv = $('#status');
-                    if (data.success) {
-                        statusDiv.html(`<div class="alert alert-success">${data.message}</div>`);
-                    } else {
-                        statusDiv.html(`<div class="alert alert-danger">Error: ${data.message}</div>`);
-                    }
-                })
-                .catch(error => {
-                    $('#status').html(`<div class="alert alert-danger">Error: Failed to fetch data - ${error.message}</div>`);
-                })
-                .finally(() => {
-                    hideLoading();
-                });
-            });
-
             // Form submit handler
             $('#filter-form').on('submit', function(e) {
                 e.preventDefault();
@@ -400,321 +329,55 @@
             });
         });
 
-        // Define applyFilters globally
         function applyFilters() {
-            showLoading('Processing data...');
+            showLoading('Processing Google Ads data...');
 
             const startDate = $('#start_date').val();
             const endDate = $('#end_date').val();
             const filterColumn = $('#filter_column').val();
-            const selectedOwners = $('.owner-checkbox:checked').map(function() {
-                return $(this).val();
-            }).get();
+
             const data = {
                 start_date: startDate,
                 end_date: endDate,
-                filter_column: filterColumn,
-                selected_owners: selectedOwners
+                filter_column: filterColumn
             };
 
             $.ajax({
-                url: '/apply_filters',
+                url: '/apply_filters_google_ads',
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(data),
-                success: function(response){
-                    if(response.status === 'success') {
+                success: function(response) {
+                    if (response.status === 'success') {
                         const statusDiv = $('#status');
-                        // Destroy existing DataTable if it exists
-                        if ($.fn.DataTable.isDataTable('#data-table table')) {
-                            $('#data-table table').DataTable().destroy();
-                        }
-                        // Clear existing charts
-                        document.querySelectorAll('canvas').forEach(canvas => {
-                            if (canvas.chart) {
-                                canvas.chart.destroy();
-                            }
-                        });
 
                         statusDiv.fadeOut(400, function() {
-                            let tableHtml = response.table;
-
-                            // Parse table data for charts
-                            const parser = new DOMParser();
-                            const doc = parser.parseFromString(tableHtml, 'text/html');
-                            const table = doc.querySelector('table');
-                            const headers = Array.from(table.querySelectorAll('th')).map(th => th.textContent.trim());
-                            const rows = Array.from(table.querySelectorAll('tbody tr')).map(tr => 
-                                Array.from(tr.querySelectorAll('td')).map(td => td.textContent.trim())
-                            );
-
-                            // Filter out the "Total" row
-                            const data = rows.filter(row => row[0] !== 'Total');
-
-                            // Extract data for charts
-                            const owners = data.map(row => row[headers.indexOf('Owner')]);
-                            const newCalls = data.map(row => parseFloat(row[headers.indexOf('New Calls Booked')]));
-                            const salesCalls = data.map(row => parseFloat(row[headers.indexOf('Sales Call Taken')]));
-                            const revenuePerCall = data.map(row => parseFloat(row[headers.indexOf('Revenue Per Call $')]));
-                            const closedRevenue = data.map(row => parseFloat(row[headers.indexOf('Closed Revenue $')]));
-                            const pipelineRevenue = data.map(row => parseFloat(row[headers.indexOf('Pipeline Revenue $')]));
-
-                            // Show charts container
-                            $('#charts-container').fadeIn();
-
-                            // Function to create/update chart
-                            function createOrUpdateChart(canvasId, label, data, color) {
-                                const canvas = document.getElementById(canvasId);
-                                if (canvas.chart) {
-                                    canvas.chart.destroy();
-                                }
-                                canvas.chart = new Chart(canvas, {
-                                    type: 'bar',
-                                    data: {
-                                        labels: owners,
-                                        datasets: [{
-                                            label: label,
-                                            data: data,
-                                            backgroundColor: color
-                                        }]
-                                    },
-                                    options: {
-                                        responsive: true,
-                                        scales: {
-                                            y: {
-                                                beginAtZero: true
-                                            }
-                                        }
-                                    }
-                                });
-                                return canvas.chart;
-                            }
-
-                            // Create/update all charts
-                            createOrUpdateChart('newCallsChart', 'New Calls Booked', newCalls, 'rgba(75, 192, 192, 0.6)');
-
-                            createOrUpdateChart('salesCallsChart', 'Sales Calls Taken', salesCalls, 'rgba(153, 102, 255, 0.6)');
-                            createOrUpdateChart('revenuePerCallChart', 'Revenue per Call ($)', revenuePerCall, 'rgba(255, 159, 64, 0.6)');
-                            createOrUpdateChart('closedRevenueChart', 'Closed Revenue ($)', closedRevenue, 'rgba(255, 99, 132, 0.6)');
-                            createOrUpdateChart('closeRateChart', 'Close Rate (%)', data.map(row => parseFloat(row[headers.indexOf('Close Rate %')])), 'rgba(54, 162, 235, 0.6)');
-                            const tableElem = doc.querySelector('table');
-                            tableElem.classList.add('table', 'table-striped', 'table-bordered', 'fade-in');
-
-                            const tbodyRows = tableElem.querySelectorAll('tbody tr');
-                            if(tbodyRows.length > 0) {
-                                const lastRow = tbodyRows[tbodyRows.length - 1];
-                                const firstCell = lastRow.querySelector('td');
-                                if(firstCell && firstCell.innerText.trim().toLowerCase() === 'total') {
-                                    const tfoot = doc.createElement('tfoot');
-                                    tfoot.appendChild(lastRow);
-                                    tableElem.appendChild(tfoot);
-                                }
-                            }
-
-                            tableHtml = tableElem.outerHTML;
                             statusDiv.html(`
-                                <div class="alert alert-success mb-3">Data processed successfully!</div>
-                                <div class="table-responsive" id="data-table"></div>
-                            `).fadeIn(400, function() {
-                                if ($.fn.DataTable.isDataTable('#data-table table')) {
-                                    $('#data-table table').DataTable().destroy();
-                                }
-                                $('#data-table').html(tableHtml);
-                                const dataTable = $('#data-table table').DataTable({
-                                    scrollX: true,
-                                    scrollY: '60vh',
-                                    scrollCollapse: true,
-                                    paging: true,
-                                    pageLength: 25,
-                                    lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
-                                    fixedHeader: true,
-                                    fixedColumns: {
-                                        leftColumns: 1
-                                    },
-                                    dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
-                                         '<"row"<"col-sm-12"B>>' +
-                                         '<"row"<"col-sm-12"tr>>' +
-                                         '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
-                                    buttons: [
-                                        {
-                                            extend: 'copy',
-                                            className: 'btn btn-sm btn-outline-primary'
-                                        },
-                                        {
-                                            extend: 'csv',
-                                            className: 'btn btn-sm btn-outline-success'
-                                        },
-                                        {
-                                            extend: 'excel',
-                                            className: 'btn btn-sm btn-outline-success'
-                                        },
-                                        {
-                                            extend: 'pdf',
-                                            className: 'btn btn-sm btn-outline-danger'
-                                        },
-                                        {
-                                            extend: 'print',
-                                            className: 'btn btn-sm btn-outline-info'
-                                        }
-                                    ],
-                                    order: [],
-                                    language: {
-                                        search: "",
-                                        searchPlaceholder: "Search owners, metrics...",
-                                        lengthMenu: "Show _MENU_ entries per page",
-                                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                                        paginate: {
-                                            first: "First",
-                                            last: "Last",
-                                            next: "Next",
-                                            previous: "Previous"
-                                        }
-                                    },
-                                    columnDefs: [
-                                        {
-                                            targets: 0,
-                                            className: 'owner-cell'
-                                        },
-                                        {
-                                            targets: '_all',
-                                            render: function(data, type, row, meta) {
-                                                if (type === 'display' && typeof data === 'number') {
-                                                    // Check if it's a percentage
-                                                    if (meta.settings.aoColumns[meta.col].sTitle.includes('%')) {
-                                                        return '<span class="percentage-cell">' + data.toFixed(1) + '%</span>';
-                                                    }
-                                                    // Check if it's a dollar amount
-                                                    else if (meta.settings.aoColumns[meta.col].sTitle.includes('$')) {
-                                                        return '<span class="numeric-cell">$' + data.toLocaleString() + '</span>';
-                                                    }
-                                                    // Regular number
-                                                    else {
-                                                        return '<span class="numeric-cell">' + data.toLocaleString() + '</span>';
-                                                    }
-                                                }
-                                                return data;
-                                            }
-                                        }
-                                    ],
-                                    initComplete: function() {
-                                        // Add custom styling to the Total row
-                                        $('#data-table table tbody tr:last-child').addClass('table-warning');
+                                <div class="alert alert-success mb-3">Google Ads data processed successfully!</div>
+                            `).fadeIn(400);
 
-                                        // Add search to individual columns
-                                        this.api().columns().every(function() {
-                                            var column = this;
-                                            var title = $(column.header()).text();
+                            // Show and populate campaign table
+                            $('#campaign-table').html(response.campaign_table);
+                            $('#campaign-results').fadeIn();
+                            initializeDataTable('campaign-table');
 
-                                            if (title !== '') {
-                                                $(column.header()).append('<br><input type="text" placeholder="Filter ' + title + '" style="width:100%;font-size:10px;margin-top:5px;" />');
-
-                                                $('input', column.header()).on('keyup change clear', function() {
-                                                    if (column.search() !== this.value) {
-                                                        column.search(this.value).draw();
-                                                    }
-                                                });
-                                            }
-                                        });
-                                    }
-                                });
-                            });
+                            // Show and populate content table
+                            $('#content-table').html(response.content_table);
+                            $('#content-results').fadeIn();
+                            initializeDataTable('content-table');
                         });
                     } else {
-                        alert(response.message);
+                        $('#status').html(`<div class="alert alert-danger">Error: ${response.message}</div>`);
                     }
                 },
-                error: function(){
-                    alert('Error applying filters');
+                error: function() {
+                    $('#status').html('<div class="alert alert-danger">Error applying filters</div>');
                 },
-                complete: function(){
+                complete: function() {
                     hideLoading();
                 }
             });
         }
-
-
-        // Initial load
-        $(document).ready(function(){
-            // Initialize any document.ready specific functionality here
-
-        // Initialize any document.ready specific functionality here
-
-
-        // Table rendering function
-        function renderChartsFromTable(dataTable) {
-            $('#charts-row').empty();
-            const columns = dataTable.columns().header().toArray().map(h => $(h).text());
-            const rows = dataTable.rows().data().toArray();
-            const owners = rows
-                .map(r => r[columns.indexOf('Owner')])
-                .filter(v => (v !== 'Total' && v !== undefined));
-            const numericCols = columns.filter(c => c !== 'Owner' && c !== '');
-            const chartTypes = ['bar', 'line', 'pie', 'doughnut', 'polarArea'];
-
-            numericCols.forEach((colName, idx) => {
-                const colIndex = columns.indexOf(colName);
-                if (colIndex === -1) return;
-                const colValues = rows
-                    .map(r => parseFloat(r[colIndex]))
-                    .filter((val, i) => (owners[i] !== 'Total' && !isNaN(val)));
-                if (!colValues.length) return;
-                const canvasId = `chart-${idx}`;
-                $('#charts-row').append(`
-                    <div class="col-md-6">
-                        <div class="card chart-card">
-                            <div class="card-body">
-                                <h5 class="card-title mb-2">${colName}</h5>
-                                <div class="chart-container">
-                                    <canvas id="${canvasId}"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `);
-                const chartType = chartTypes[idx % chartTypes.length];
-                let chartData = {};
-                if (chartType === 'pie' || chartType === 'doughnut' || chartType === 'polarArea') {
-                    chartData = {
-                        labels: owners,
-                        datasets: [{
-                            label: colName,
-                            data: colValues
-                        }]
-                    };
-                } else {
-                    chartData = {
-                        labels: owners,
-                        datasets: [{
-                            label: colName,
-                            data: colValues,
-                            fill: (chartType === 'line') ? false : true,
-                            tension: 0.1
-                        }]
-                    };
-                }
-                new Chart(document.getElementById(canvasId), {
-                    type: chartType,
-                    data: chartData,
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: `${colName} (${chartType.toUpperCase()})`
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
-                        }
-                    }
-                });
-            });
-        }
-    });
-
     </script>
 </body>
 </html>

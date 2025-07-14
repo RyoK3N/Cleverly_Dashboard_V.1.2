@@ -1056,16 +1056,34 @@ def process_data_Google_Ads(dataframes: dict[str, pd.DataFrame], st_date: str,
     op_unqualified = dataframes.get("unqualified", pd.DataFrame())
     op_won = dataframes.get("won", pd.DataFrame())
 
+    # ── Combine all stages into one DataFrame ────────────────────────────
+    all_stages = pd.concat([op_cancelled, op_lost, op_noshow, op_proposal, op_scheduled, op_unqualified, op_won], ignore_index=True)
 
-    # ── lets group this data by UTM Campaigns and Display the Campaigns as index ──
+    # ── Apply date filter if data exists ─────────────────────────────────
+    if not all_stages.empty and filter_column in all_stages.columns:
+        all_stages = fdate(all_stages, filter_column, st_date, end_date)
 
-    df_campaigns = pd.concat([op_cancelled, op_lost, op_noshow, op_proposal, op_scheduled, op_unqualified, op_won])
+    # ── Group by UTM Campaign and count occurrences ─────────────────────
+    if not all_stages.empty and 'UTM Campaign' in all_stages.columns:
+        df_campaigns = all_stages.groupby('UTM Campaign').agg({
+            'UTM Campaign': 'count',
+            'Deal Value': 'sum'
+        }).rename(columns={'UTM Campaign': 'Count', 'Deal Value': 'Total Deal Value'})
+        df_campaigns = df_campaigns.reset_index()
+        df_campaigns['Total Deal Value'] = df_campaigns['Total Deal Value'].fillna(0)
+    else:
+        df_campaigns = pd.DataFrame(columns=['UTM Campaign', 'Count', 'Total Deal Value'])
 
-    df_campaigns = df_campaigns.groupby('UTM Campaign').size().reset_index
-
-    # ───────────────────────────────────────────────────────────────────────
-
-    df_content = df_campaigns.groupby('UTM Content').size().reset_index
+    # ── Group by UTM Content and count occurrences ──────────────────────
+    if not all_stages.empty and 'UTM Content' in all_stages.columns:
+        df_content = all_stages.groupby('UTM Content').agg({
+            'UTM Content': 'count',
+            'Deal Value': 'sum'
+        }).rename(columns={'UTM Content': 'Count', 'Deal Value': 'Total Deal Value'})
+        df_content = df_content.reset_index()
+        df_content['Total Deal Value'] = df_content['Total Deal Value'].fillna(0)
+    else:
+        df_content = pd.DataFrame(columns=['UTM Content', 'Count', 'Total Deal Value'])
 
     return df_campaigns, df_content
 

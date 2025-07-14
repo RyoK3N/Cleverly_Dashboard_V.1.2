@@ -735,6 +735,14 @@ def predictions():
     return render_template("predictions.html")
 
 
+@app.route('/google-ads')
+@login_required
+def google_ads():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    return render_template("google-ads.html")
+
+
 @app.route('/generate_predictions', methods=['POST'])
 @login_required
 def generate_predictions():
@@ -1433,7 +1441,7 @@ def apply_filters_cold_email():
 @app.route('/apply_filters_google_ads', methods=['POST'])
 def apply_filters_google_ads():
     try:
-        logger.info("Starting apply_filters_cold_email")
+        logger.info("Starting apply_filters_google_ads")
         # Identify the latest data file in the sessions folder
         SESSION_DIR = Path("./sessions/sessions")
         data_files = [
@@ -1455,18 +1463,18 @@ def apply_filters_google_ads():
         logger.info(f"Loading data from {latest_file}")
         with latest_file.open("r", encoding="utf-8") as file:
             json_data = json.load(file)
-            # Convert JSON data into DataFrames and filter by origin='cold-email'
+            # Convert JSON data into DataFrames and filter by UTM Source='google-ads'
             data = {}
             for key, items in json_data.items():
                 df = pd.DataFrame(items)
-                # Filter only cold-email origin data
+                # Filter only google-ads UTM Source data
                 if 'UTM Source' in df.columns:
                     df_filtered = df[df['UTM Source'] == 'google-ads']
-                    logger.info(f"Group {key}: {len(df)} total rows, {len(df_filtered)} cold-email rows")
+                    logger.info(f"Group {key}: {len(df)} total rows, {len(df_filtered)} google-ads rows")
                 else:
-                    # If no origin column, assume no cold-email data
+                    # If no UTM Source column, assume no google-ads data
                     df_filtered = pd.DataFrame(columns=df.columns)
-                    logger.info(f"Group {key}: No origin column found, using empty DataFrame")
+                    logger.info(f"Group {key}: No UTM Source column found, using empty DataFrame")
 
                 data[key] = df_filtered
 
@@ -1476,12 +1484,59 @@ def apply_filters_google_ads():
         if not filter_column:
             filter_column = 'Sales Call Date'  # Default value if none provided
         logger.info(
-            f"Processing cold-email data with date range {st_date} to {end_date} on column {filter_column}"
+            f"Processing google-ads data with date range {st_date} to {end_date} on column {filter_column}"
         )
-        selected_owners = request.json.get('selected_owners', [])
 
-        # Process the filtered data (only cold-email origin)
-        campaing_df , content_df  = process_data_Google_Ads(data, st_date, end_date, filter_column)
+        # Process the filtered data (only google-ads UTM Source)
+        campaign_df, content_df = process_data_Google_Ads(data, st_date, end_date, filter_column)
+        
+        logger.info(
+            f"Google-ads data processing complete. Campaign DataFrame has {len(campaign_df)} rows, Content DataFrame has {len(content_df)} rows"
+        )
+
+        # Handle NaN values
+        campaign_df.replace({
+            np.nan: None,
+            np.inf: None,
+            -np.inf: None
+        }, inplace=True)
+        
+        content_df.replace({
+            np.nan: None,
+            np.inf: None,
+            -np.inf: None
+        }, inplace=True)
+
+        # Convert numeric columns to float
+        numeric_columns = campaign_df.select_dtypes(include=[np.number]).columns
+        for col in numeric_columns:
+            campaign_df[col] = campaign_df[col].astype(float)
+            
+        numeric_columns = content_df.select_dtypes(include=[np.number]).columns
+        for col in numeric_columns:
+            content_df[col] = content_df[col].astype(float)
+
+        # Create HTML tables
+        campaign_html = campaign_df.to_html(
+            classes='table table-striped table-bordered',
+            index=False,
+            border=0)
+            
+        content_html = content_df.to_html(
+            classes='table table-striped table-bordered',
+            index=False,
+            border=0)
+            
+        return jsonify({
+            "status": "success", 
+            "campaign_table": campaign_html,
+            "content_table": content_html
+        })
+
+    except Exception as e:
+        logger.error("Error in apply_filters_google_ads: %s", e)
+        logger.debug("Traceback:\n%s", traceback.format_exc())
+        return jsonify({"status": "error", "message": str(e)})
 
         
 
