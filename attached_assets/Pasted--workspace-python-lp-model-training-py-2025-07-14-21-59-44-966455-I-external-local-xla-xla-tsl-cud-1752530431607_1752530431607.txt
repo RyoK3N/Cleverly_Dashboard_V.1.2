@@ -1,0 +1,343 @@
+/workspace$ python lp_model_training.py
+2025-07-14 21:59:44.966455: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:32] Could not find cuda drivers on your machine, GPU will not be used.
+2025-07-14 21:59:44.969836: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:32] Could not find cuda drivers on your machine, GPU will not be used.
+2025-07-14 21:59:44.978048: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:467] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1752530384.991339    9289 cuda_dnn.cc:8579] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1752530384.995415    9289 cuda_blas.cc:1407] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+W0000 00:00:1752530385.007454    9289 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1752530385.007475    9289 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1752530385.007477    9289 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1752530385.007483    9289 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+2025-07-14 21:59:45.010872: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2025-07-14 21:59:47,222 | INFO | Initializing data module...
+2025-07-14 21:59:47.238882: E external/local_xla/xla/stream_executor/cuda/cuda_platform.cc:51] failed call to cuInit: INTERNAL: CUDA error: Failed call to cuInit: UNKNOWN ERROR (303)
+2025-07-14 21:59:47,262 | INFO | Starting training...
+2025-07-14 21:59:47,398 | INFO | Training fold 1/5 (train=1243, val=311)
+Epoch 1/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 3s 134ms/step - auc: 0.4983 - loss: 0.7034 - val_auc: 0.5449 - val_loss: 0.7019 - learning_rate: 0.0010
+Epoch 2/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 13ms/step - auc: 0.6722 - loss: 0.6952 - val_auc: 0.6066 - val_loss: 0.6987 - learning_rate: 0.0010
+Epoch 3/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 16ms/step - auc: 0.7857 - loss: 0.6877 - val_auc: 0.6866 - val_loss: 0.6936 - learning_rate: 0.0010
+Epoch 4/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 16ms/step - auc: 0.9003 - loss: 0.6730 - val_auc: 0.7464 - val_loss: 0.6839 - learning_rate: 0.0010
+Epoch 5/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step - auc: 0.9476 - loss: 0.6458 - val_auc: 0.7739 - val_loss: 0.6651 - learning_rate: 0.0010
+Epoch 6/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 14ms/step - auc: 0.9799 - loss: 0.5865 - val_auc: 0.7834 - val_loss: 0.6334 - learning_rate: 0.0010
+Epoch 7/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 13ms/step - auc: 0.9921 - loss: 0.4779 - val_auc: 0.7907 - val_loss: 0.5901 - learning_rate: 0.0010
+Epoch 8/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 13ms/step - auc: 0.9988 - loss: 0.3003 - val_auc: 0.7950 - val_loss: 0.5524 - learning_rate: 0.0010
+Epoch 9/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 14ms/step - auc: 0.9999 - loss: 0.1260 - val_auc: 0.7974 - val_loss: 0.5516 - learning_rate: 0.0010
+Epoch 10/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 12ms/step - auc: 1.0000 - loss: 0.0357 - val_auc: 0.8022 - val_loss: 0.5974 - learning_rate: 0.0010
+Epoch 11/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 13ms/step - auc: 1.0000 - loss: 0.0161 - val_auc: 0.8005 - val_loss: 0.6296 - learning_rate: 0.0010
+Epoch 12/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step - auc: 1.0000 - loss: 0.0122 - val_auc: 0.8007 - val_loss: 0.6942 - learning_rate: 0.0010
+Epoch 13/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 14ms/step - auc: 1.0000 - loss: 0.0124 - val_auc: 0.8027 - val_loss: 0.7965 - learning_rate: 0.0010
+Epoch 14/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 13ms/step - auc: 1.0000 - loss: 0.0111 - val_auc: 0.7984 - val_loss: 0.7311 - learning_rate: 0.0010
+Epoch 15/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 12ms/step - auc: 1.0000 - loss: 0.0114 - val_auc: 0.7948 - val_loss: 0.7265 - learning_rate: 0.0010
+Epoch 16/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step - auc: 1.0000 - loss: 0.0106 - val_auc: 0.7944 - val_loss: 0.7434 - learning_rate: 0.0010
+Epoch 17/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 14ms/step - auc: 1.0000 - loss: 0.0108 - val_auc: 0.7935 - val_loss: 0.7565 - learning_rate: 0.0010
+Epoch 18/100
+1/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 1.0000 - loss: 0.0121
+Epoch 18: ReduceLROnPlateau reducing learning rate to 0.0005000000237487257.
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 12ms/step - auc: 1.0000 - loss: 0.0112 - val_auc: 0.7883 - val_loss: 0.7606 - learning_rate: 0.0010
+Epoch 19/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 12ms/step - auc: 1.0000 - loss: 0.0104 - val_auc: 0.7880 - val_loss: 0.7657 - learning_rate: 5.0000e-04
+Epoch 20/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 1.0000 - loss: 0.0106 - val_auc: 0.7876 - val_loss: 0.7713 - learning_rate: 5.0000e-04
+Epoch 21/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 12ms/step - auc: 1.0000 - loss: 0.0104 - val_auc: 0.7876 - val_loss: 0.7793 - learning_rate: 5.0000e-04
+Epoch 22/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 1.0000 - loss: 0.0103 - val_auc: 0.7870 - val_loss: 0.7844 - learning_rate: 5.0000e-04
+Epoch 23/100
+1/5 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step - auc: 1.0000 - loss: 0.0105
+Epoch 23: ReduceLROnPlateau reducing learning rate to 0.0002500000118743628.
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 15ms/step - auc: 1.0000 - loss: 0.0104 - val_auc: 0.7872 - val_loss: 0.7857 - learning_rate: 5.0000e-04
+Epoch 23: early stopping
+Restoring model weights from the end of the best epoch: 13.
+2025-07-14 21:59:53.130426: I tensorflow/core/framework/local_rendezvous.cc:407] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+2025-07-14 21:59:53,133 | INFO | Fold 1 AUC: 0.8028
+2025-07-14 21:59:53,264 | INFO | Training fold 2/5 (train=1243, val=311)
+Epoch 1/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 3s 107ms/step - auc: 0.5011 - loss: 0.7031 - val_auc: 0.5531 - val_loss: 0.7007 - learning_rate: 0.0010
+Epoch 2/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 12ms/step - auc: 0.6493 - loss: 0.6953 - val_auc: 0.6389 - val_loss: 0.6959 - learning_rate: 0.0010
+Epoch 3/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 0.8047 - loss: 0.6839 - val_auc: 0.7329 - val_loss: 0.6869 - learning_rate: 0.0010
+Epoch 4/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 0.9158 - loss: 0.6632 - val_auc: 0.7743 - val_loss: 0.6696 - learning_rate: 0.0010
+Epoch 5/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 0.9581 - loss: 0.6241 - val_auc: 0.7806 - val_loss: 0.6389 - learning_rate: 0.0010
+Epoch 6/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 0.9757 - loss: 0.5462 - val_auc: 0.7826 - val_loss: 0.5948 - learning_rate: 0.0010
+Epoch 7/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 0.9893 - loss: 0.4125 - val_auc: 0.7810 - val_loss: 0.5544 - learning_rate: 0.0010
+Epoch 8/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 12ms/step - auc: 0.9969 - loss: 0.2338 - val_auc: 0.7808 - val_loss: 0.5472 - learning_rate: 0.0010
+Epoch 9/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 0.9995 - loss: 0.0896 - val_auc: 0.7773 - val_loss: 0.5881 - learning_rate: 0.0010
+Epoch 10/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step - auc: 1.0000 - loss: 0.0275 - val_auc: 0.7719 - val_loss: 0.6460 - learning_rate: 0.0010
+Epoch 11/100
+1/5 ━━━━━━━━━━━━━━━━━━━━ 0s 17ms/step - auc: 1.0000 - loss: 0.0137
+Epoch 11: ReduceLROnPlateau reducing learning rate to 0.0005000000237487257.
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 12ms/step - auc: 1.0000 - loss: 0.0147 - val_auc: 0.7694 - val_loss: 0.6900 - learning_rate: 0.0010
+Epoch 12/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 1.0000 - loss: 0.0116 - val_auc: 0.7686 - val_loss: 0.7051 - learning_rate: 5.0000e-04
+Epoch 13/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 1.0000 - loss: 0.0125 - val_auc: 0.7698 - val_loss: 0.7140 - learning_rate: 5.0000e-04
+Epoch 14/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 1.0000 - loss: 0.0114 - val_auc: 0.7699 - val_loss: 0.7200 - learning_rate: 5.0000e-04
+Epoch 15/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - auc: 1.0000 - loss: 0.0113 - val_auc: 0.7714 - val_loss: 0.7254 - learning_rate: 5.0000e-04
+Epoch 16/100
+1/5 ━━━━━━━━━━━━━━━━━━━━ 0s 22ms/step - auc: 1.0000 - loss: 0.0131
+Epoch 16: ReduceLROnPlateau reducing learning rate to 0.0002500000118743628.
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 13ms/step - auc: 1.0000 - loss: 0.0123 - val_auc: 0.7722 - val_loss: 0.7245 - learning_rate: 5.0000e-04
+Epoch 16: early stopping
+Restoring model weights from the end of the best epoch: 6.
+2025-07-14 21:59:58.204270: I tensorflow/core/framework/local_rendezvous.cc:407] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+2025-07-14 21:59:58,207 | INFO | Fold 2 AUC: 0.7823
+2025-07-14 21:59:58,321 | INFO | Training fold 3/5 (train=1243, val=311)
+Epoch 1/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 3s 128ms/step - auc: 0.4806 - loss: 0.7038 - val_auc: 0.5852 - val_loss: 0.6997 - learning_rate: 0.0010
+Epoch 2/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 16ms/step - auc: 0.6491 - loss: 0.6966 - val_auc: 0.6579 - val_loss: 0.6963 - learning_rate: 0.0010
+Epoch 3/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 15ms/step - auc: 0.8041 - loss: 0.6875 - val_auc: 0.7365 - val_loss: 0.6905 - learning_rate: 0.0010
+Epoch 4/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 12ms/step - auc: 0.9072 - loss: 0.6733 - val_auc: 0.7972 - val_loss: 0.6799 - learning_rate: 0.0010
+Epoch 5/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 0.9630 - loss: 0.6443 - val_auc: 0.8105 - val_loss: 0.6591 - learning_rate: 0.0010
+Epoch 6/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 0.9844 - loss: 0.5845 - val_auc: 0.8105 - val_loss: 0.6228 - learning_rate: 0.0010
+Epoch 7/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - auc: 0.9951 - loss: 0.4637 - val_auc: 0.8090 - val_loss: 0.5745 - learning_rate: 0.0010
+Epoch 8/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 0.9975 - loss: 0.2838 - val_auc: 0.8075 - val_loss: 0.5384 - learning_rate: 0.0010
+Epoch 9/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 0.9998 - loss: 0.1044 - val_auc: 0.8068 - val_loss: 0.5460 - learning_rate: 0.0010
+Epoch 10/100
+1/5 ━━━━━━━━━━━━━━━━━━━━ 0s 13ms/step - auc: 1.0000 - loss: 0.0331
+Epoch 10: ReduceLROnPlateau reducing learning rate to 0.0005000000237487257.
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 1.0000 - loss: 0.0295 - val_auc: 0.8092 - val_loss: 0.5715 - learning_rate: 0.0010
+Epoch 11/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 1.0000 - loss: 0.0140 - val_auc: 0.8109 - val_loss: 0.5820 - learning_rate: 5.0000e-04
+Epoch 12/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 1.0000 - loss: 0.0121 - val_auc: 0.8129 - val_loss: 0.5891 - learning_rate: 5.0000e-04
+Epoch 13/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 1.0000 - loss: 0.0112 - val_auc: 0.8160 - val_loss: 0.5966 - learning_rate: 5.0000e-04
+Epoch 14/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 13ms/step - auc: 1.0000 - loss: 0.0109 - val_auc: 0.8197 - val_loss: 0.6100 - learning_rate: 5.0000e-04
+Epoch 15/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 1.0000 - loss: 0.0108 - val_auc: 0.8224 - val_loss: 0.6211 - learning_rate: 5.0000e-04
+Epoch 16/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 15ms/step - auc: 1.0000 - loss: 0.0107 - val_auc: 0.8249 - val_loss: 0.6243 - learning_rate: 5.0000e-04
+Epoch 17/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 15ms/step - auc: 1.0000 - loss: 0.0106 - val_auc: 0.8261 - val_loss: 0.6254 - learning_rate: 5.0000e-04
+Epoch 18/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step - auc: 1.0000 - loss: 0.0108 - val_auc: 0.8272 - val_loss: 0.6252 - learning_rate: 5.0000e-04
+Epoch 19/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step - auc: 1.0000 - loss: 0.0105 - val_auc: 0.8279 - val_loss: 0.6206 - learning_rate: 5.0000e-04
+Epoch 20/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 14ms/step - auc: 1.0000 - loss: 0.0104 - val_auc: 0.8297 - val_loss: 0.6153 - learning_rate: 5.0000e-04
+Epoch 21/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 12ms/step - auc: 1.0000 - loss: 0.0104 - val_auc: 0.8305 - val_loss: 0.6162 - learning_rate: 5.0000e-04
+Epoch 22/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 13ms/step - auc: 1.0000 - loss: 0.0103 - val_auc: 0.8313 - val_loss: 0.6158 - learning_rate: 5.0000e-04
+Epoch 23/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 12ms/step - auc: 1.0000 - loss: 0.0103 - val_auc: 0.8321 - val_loss: 0.6133 - learning_rate: 5.0000e-04
+Epoch 24/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - auc: 1.0000 - loss: 0.0103 - val_auc: 0.8333 - val_loss: 0.6127 - learning_rate: 5.0000e-04
+Epoch 25/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 1.0000 - loss: 0.0102 - val_auc: 0.8339 - val_loss: 0.6099 - learning_rate: 5.0000e-04
+Epoch 26/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 12ms/step - auc: 1.0000 - loss: 0.0101 - val_auc: 0.8347 - val_loss: 0.6061 - learning_rate: 5.0000e-04
+Epoch 27/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 12ms/step - auc: 1.0000 - loss: 0.0100 - val_auc: 0.8358 - val_loss: 0.6020 - learning_rate: 5.0000e-04
+Epoch 28/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 12ms/step - auc: 1.0000 - loss: 0.0100 - val_auc: 0.8360 - val_loss: 0.6024 - learning_rate: 5.0000e-04
+Epoch 29/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 1.0000 - loss: 0.0102 - val_auc: 0.8355 - val_loss: 0.5950 - learning_rate: 5.0000e-04
+Epoch 30/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - auc: 1.0000 - loss: 0.0100 - val_auc: 0.8356 - val_loss: 0.5904 - learning_rate: 5.0000e-04
+Epoch 31/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - auc: 1.0000 - loss: 0.0100 - val_auc: 0.8359 - val_loss: 0.5897 - learning_rate: 5.0000e-04
+Epoch 32/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 1.0000 - loss: 0.0099 - val_auc: 0.8361 - val_loss: 0.5892 - learning_rate: 5.0000e-04
+Epoch 33/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - auc: 1.0000 - loss: 0.0098 - val_auc: 0.8369 - val_loss: 0.5886 - learning_rate: 5.0000e-04
+Epoch 34/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - auc: 1.0000 - loss: 0.0098 - val_auc: 0.8367 - val_loss: 0.5894 - learning_rate: 5.0000e-04
+Epoch 35/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 12ms/step - auc: 1.0000 - loss: 0.0099 - val_auc: 0.8370 - val_loss: 0.5933 - learning_rate: 5.0000e-04
+Epoch 36/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 16ms/step - auc: 1.0000 - loss: 0.0097 - val_auc: 0.8369 - val_loss: 0.5953 - learning_rate: 5.0000e-04
+Epoch 37/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - auc: 1.0000 - loss: 0.0097 - val_auc: 0.8367 - val_loss: 0.5953 - learning_rate: 5.0000e-04
+Epoch 38/100
+1/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 1.0000 - loss: 0.0097
+Epoch 38: ReduceLROnPlateau reducing learning rate to 0.0002500000118743628.
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - auc: 1.0000 - loss: 0.0097 - val_auc: 0.8367 - val_loss: 0.5960 - learning_rate: 5.0000e-04
+Epoch 39/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step - auc: 1.0000 - loss: 0.0097 - val_auc: 0.8365 - val_loss: 0.5977 - learning_rate: 2.5000e-04
+Epoch 40/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - auc: 1.0000 - loss: 0.0097 - val_auc: 0.8368 - val_loss: 0.5990 - learning_rate: 2.5000e-04
+Epoch 41/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 12ms/step - auc: 1.0000 - loss: 0.0097 - val_auc: 0.8366 - val_loss: 0.5989 - learning_rate: 2.5000e-04
+Epoch 42/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 13ms/step - auc: 1.0000 - loss: 0.0096 - val_auc: 0.8369 - val_loss: 0.5994 - learning_rate: 2.5000e-04
+Epoch 43/100
+1/5 ━━━━━━━━━━━━━━━━━━━━ 0s 15ms/step - auc: 1.0000 - loss: 0.0095
+Epoch 43: ReduceLROnPlateau reducing learning rate to 0.0001250000059371814.
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 13ms/step - auc: 1.0000 - loss: 0.0096 - val_auc: 0.8367 - val_loss: 0.5999 - learning_rate: 2.5000e-04
+Epoch 44/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 1.0000 - loss: 0.0096 - val_auc: 0.8367 - val_loss: 0.5998 - learning_rate: 1.2500e-04
+Epoch 45/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 14ms/step - auc: 1.0000 - loss: 0.0095 - val_auc: 0.8367 - val_loss: 0.5994 - learning_rate: 1.2500e-04
+Epoch 45: early stopping
+Restoring model weights from the end of the best epoch: 35.
+2025-07-14 22:00:05,065 | INFO | Fold 3 AUC: 0.8352
+2025-07-14 22:00:05,203 | INFO | Training fold 4/5 (train=1243, val=311)
+Epoch 1/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 3s 113ms/step - auc: 0.6350 - loss: 0.6967 - val_auc: 0.6461 - val_loss: 0.6955 - learning_rate: 0.0010
+Epoch 2/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 15ms/step - auc: 0.7550 - loss: 0.6890 - val_auc: 0.6995 - val_loss: 0.6906 - learning_rate: 0.0010
+Epoch 3/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 14ms/step - auc: 0.8624 - loss: 0.6761 - val_auc: 0.7338 - val_loss: 0.6819 - learning_rate: 0.0010
+Epoch 4/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 14ms/step - auc: 0.9296 - loss: 0.6548 - val_auc: 0.7447 - val_loss: 0.6662 - learning_rate: 0.0010
+Epoch 5/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 13ms/step - auc: 0.9618 - loss: 0.6095 - val_auc: 0.7415 - val_loss: 0.6383 - learning_rate: 0.0010
+Epoch 6/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - auc: 0.9780 - loss: 0.5255 - val_auc: 0.7407 - val_loss: 0.6030 - learning_rate: 0.0010
+Epoch 7/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 12ms/step - auc: 0.9921 - loss: 0.3793 - val_auc: 0.7401 - val_loss: 0.5835 - learning_rate: 0.0010
+Epoch 8/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 0.9981 - loss: 0.1931 - val_auc: 0.7402 - val_loss: 0.6068 - learning_rate: 0.0010
+Epoch 9/100
+1/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 0.9998 - loss: 0.0798
+Epoch 9: ReduceLROnPlateau reducing learning rate to 0.0005000000237487257.
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - auc: 0.9996 - loss: 0.0650 - val_auc: 0.7373 - val_loss: 0.6749 - learning_rate: 0.0010
+Epoch 10/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 1.0000 - loss: 0.0201 - val_auc: 0.7374 - val_loss: 0.7061 - learning_rate: 5.0000e-04
+Epoch 11/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 12ms/step - auc: 1.0000 - loss: 0.0181 - val_auc: 0.7357 - val_loss: 0.7294 - learning_rate: 5.0000e-04
+Epoch 12/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - auc: 1.0000 - loss: 0.0129 - val_auc: 0.7369 - val_loss: 0.7437 - learning_rate: 5.0000e-04
+Epoch 13/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 1.0000 - loss: 0.0121 - val_auc: 0.7376 - val_loss: 0.7528 - learning_rate: 5.0000e-04
+Epoch 14/100
+1/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 1.0000 - loss: 0.0115
+Epoch 14: ReduceLROnPlateau reducing learning rate to 0.0002500000118743628.
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 1.0000 - loss: 0.0116 - val_auc: 0.7382 - val_loss: 0.7584 - learning_rate: 5.0000e-04
+Epoch 14: early stopping
+Restoring model weights from the end of the best epoch: 4.
+2025-07-14 22:00:09.825789: I tensorflow/core/framework/local_rendezvous.cc:407] Local rendezvous is aborting with status: OUT_OF_RANGE: End of sequence
+2025-07-14 22:00:09,828 | INFO | Fold 4 AUC: 0.7419
+2025-07-14 22:00:09,941 | INFO | Training fold 5/5 (train=1244, val=310)
+Epoch 1/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 3s 108ms/step - auc: 0.4519 - loss: 0.7056 - val_auc: 0.4952 - val_loss: 0.7037 - learning_rate: 0.0010
+Epoch 2/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 0.6111 - loss: 0.6977 - val_auc: 0.5634 - val_loss: 0.7004 - learning_rate: 0.0010
+Epoch 3/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - auc: 0.7860 - loss: 0.6889 - val_auc: 0.6766 - val_loss: 0.6947 - learning_rate: 0.0010
+Epoch 4/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 0.9055 - loss: 0.6741 - val_auc: 0.7694 - val_loss: 0.6832 - learning_rate: 0.0010
+Epoch 5/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 0.9592 - loss: 0.6456 - val_auc: 0.8070 - val_loss: 0.6598 - learning_rate: 0.0010
+Epoch 6/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - auc: 0.9773 - loss: 0.5893 - val_auc: 0.8191 - val_loss: 0.6182 - learning_rate: 0.0010
+Epoch 7/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 0.9936 - loss: 0.4713 - val_auc: 0.8250 - val_loss: 0.5596 - learning_rate: 0.0010
+Epoch 8/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 13ms/step - auc: 0.9980 - loss: 0.2906 - val_auc: 0.8229 - val_loss: 0.5183 - learning_rate: 0.0010
+Epoch 9/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 0.9997 - loss: 0.1135 - val_auc: 0.8196 - val_loss: 0.5216 - learning_rate: 0.0010
+Epoch 10/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 1.0000 - loss: 0.0308 - val_auc: 0.8150 - val_loss: 0.5636 - learning_rate: 0.0010
+Epoch 11/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 13ms/step - auc: 1.0000 - loss: 0.0141 - val_auc: 0.8083 - val_loss: 0.6155 - learning_rate: 0.0010
+Epoch 12/100
+1/5 ━━━━━━━━━━━━━━━━━━━━ 0s 13ms/step - auc: 1.0000 - loss: 0.0110
+Epoch 12: ReduceLROnPlateau reducing learning rate to 0.0005000000237487257.
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 12ms/step - auc: 1.0000 - loss: 0.0112 - val_auc: 0.8039 - val_loss: 0.6557 - learning_rate: 0.0010
+Epoch 13/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 12ms/step - auc: 1.0000 - loss: 0.0116 - val_auc: 0.8007 - val_loss: 0.6801 - learning_rate: 5.0000e-04
+Epoch 14/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 1.0000 - loss: 0.0108 - val_auc: 0.7960 - val_loss: 0.7147 - learning_rate: 5.0000e-04
+Epoch 15/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - auc: 1.0000 - loss: 0.0112 - val_auc: 0.7952 - val_loss: 0.7212 - learning_rate: 5.0000e-04
+Epoch 16/100
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 12ms/step - auc: 1.0000 - loss: 0.0111 - val_auc: 0.7940 - val_loss: 0.7149 - learning_rate: 5.0000e-04
+Epoch 17/100
+1/5 ━━━━━━━━━━━━━━━━━━━━ 0s 19ms/step - auc: 1.0000 - loss: 0.0109
+Epoch 17: ReduceLROnPlateau reducing learning rate to 0.0002500000118743628.
+5/5 ━━━━━━━━━━━━━━━━━━━━ 0s 13ms/step - auc: 1.0000 - loss: 0.0108 - val_auc: 0.7949 - val_loss: 0.7006 - learning_rate: 5.0000e-04
+Epoch 17: early stopping
+Restoring model weights from the end of the best epoch: 7.
+2025-07-14 22:00:14,558 | INFO | Fold 5 AUC: 0.8255
+2025-07-14 22:00:14,656 | INFO | CV Results - Mean AUC: 0.7976 ± 0.0667
+2025-07-14 22:00:14,657 | INFO | Training completed: {'fold_aucs': [0.8028122415219189, 0.7822580645161291, 0.8352357320099255, 0.7419354838709679, 0.8255150884495318], 'mean_auc': 0.7975513220736947, 'std_auc': 0.03333697479172014, 'best_fold': 3}
+2025-07-14 22:00:14,657 | INFO | Testing inference...
+2025-07-14 22:00:14,789 | ERROR | Application error: Failed to load model: `inputs` not connected to `outputs`
+Traceback (most recent call last):
+  File "/home/runner/workspace/lp_model_training.py", line 460, in _load_model
+    self.model = tf.keras.models.load_model(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/keras/src/saving/saving_api.py", line 189, in load_model
+    return saving_lib.load_model(
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/keras/src/saving/saving_lib.py", line 370, in load_model
+    return _load_model_from_fileobj(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/keras/src/saving/saving_lib.py", line 447, in _load_model_from_fileobj
+    model = _model_from_config(
+            ^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/keras/src/saving/saving_lib.py", line 436, in _model_from_config
+    model = deserialize_keras_object(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/keras/src/saving/serialization_lib.py", line 718, in deserialize_keras_object
+    instance = cls.from_config(inner_config)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/keras/src/models/model.py", line 651, in from_config
+    return functional_from_config(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/keras/src/models/functional.py", line 627, in functional_from_config
+    return cls(
+           ^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/keras/src/utils/tracking.py", line 26, in wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/keras/src/models/functional.py", line 136, in __init__
+    Function.__init__(self, inputs, outputs, name=name)
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/keras/src/ops/function.py", line 89, in __init__
+    raise ValueError("`inputs` not connected to `outputs`")
+ValueError: `inputs` not connected to `outputs`
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/runner/workspace/lp_model_training.py", line 546, in <module>
+    main()
+  File "/home/runner/workspace/lp_model_training.py", line 523, in main
+    predictor = Predictor(best_model_path, data_module)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/lp_model_training.py", line 453, in __init__
+    self._load_model()
+  File "/home/runner/workspace/lp_model_training.py", line 469, in _load_model
+    raise ModelError(f"Failed to load model: {str(e)}")
+ModelError: Failed to load model: `inputs` not connected to `outputs`
+~/workspace$ 
