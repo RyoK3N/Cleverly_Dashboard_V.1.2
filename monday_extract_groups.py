@@ -1077,6 +1077,9 @@ def process_data_Google_Ads(dataframes: dict[str, pd.DataFrame], st_date: str,
 
     # ── Group by UTM Campaign and count occurrences ─────────────────────
     if not all_stages.empty and 'UTM Campaign' in all_stages.columns:
+        # Convert Deal Value to numeric before aggregation
+        all_stages['Deal Value'] = pd.to_numeric(all_stages['Deal Value'], errors='coerce').fillna(0)
+        
         df_campaigns = all_stages.groupby('UTM Campaign').agg({
             'UTM Campaign': 'count',
             'Deal Value': 'sum'
@@ -1088,6 +1091,10 @@ def process_data_Google_Ads(dataframes: dict[str, pd.DataFrame], st_date: str,
 
     # ── Group by UTM Content and count occurrences ──────────────────────
     if not all_stages.empty and 'UTM Content' in all_stages.columns:
+        # Deal Value should already be converted above, but ensure it's numeric
+        if 'Deal Value' not in all_stages.columns or all_stages['Deal Value'].dtype == 'object':
+            all_stages['Deal Value'] = pd.to_numeric(all_stages['Deal Value'], errors='coerce').fillna(0)
+            
         df_content = all_stages.groupby('UTM Content').agg({
             'UTM Content': 'count',
             'Deal Value': 'sum'
