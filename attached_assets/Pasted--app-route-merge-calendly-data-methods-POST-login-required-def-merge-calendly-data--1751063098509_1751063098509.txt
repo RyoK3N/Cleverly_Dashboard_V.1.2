@@ -1,0 +1,99 @@
+@app.route('/merge_calendly_data', methods=['POST'])
+@login_required
+def merge_calendly_data():
+    try:
+        import pandas as pd
+        from pathlib import Path
+        
+        # Path to Calendly data
+        calendly_path = Path('./calendly_enriched_events.csv')
+        
+        if not calendly_path.exists():
+            return jsonify({
+                "status": "error",
+                "message": "Calendly data file not found. Please fetch Calendly data first."
+            })
+        
+        # Find latest Monday.com data from sessions folder
+        session_dir = Path("./sessions")
+        data_files = [f for f in session_dir.glob("data_*.json") if f.is_file()]
+        
+        if not data_files:
+            return jsonify({
+                "status": "error",
+                "message": "No Monday.com data files found in sessions directory."
+            })
+        
+        latest_file = max(data_files, key=lambda f: f.stat().st_mtime)
+        logger.info(f"Using latest Monday.com data file: {latest_file}")
+        
+        # Load Calendly data
+        df_calendly = pd.read_csv(calendly_path)
+        logger.info(f"Loaded {len(df_calendly)} Calendly records")
+        
+        # Load Monday.com data
+        with latest_file.open("r", encoding="utf-8") as file:
+            json_data = json.load(file)
+        
+        # Combine all Monday.com groups into a single DataFrame
+        all_monday_data = []
+        for group_name, group_data in json_data.items():
+            for row in group_data:
+                row_with_group = row.copy()
+                row_with_group['Data_Group'] = group_name
+                all_monday_data.append(row_with_group)
+        
+        df_monday = pd.DataFrame(all_monday_data)
+        logger.info(f"Loaded {len(df_monday)} Monday.com records")
+        
+        # Check if Email column exists in Monday.com data
+        if 'Email' not in df_monday.columns:
+            return jsonify({
+                "status": "error",
+                "message": "Email column not found in Monday.com data."
+            })
+        
+        # Create a new column 'origin' in df_monday DataFrame
+        df_monday['origin'] = 'LinkedIn'  # Default value
+        
+        # Check each email and update origin accordingly
+        calendly_emails = df_calendly['invitee_email'].dropna().unique()
+        matches = 0
+        
+        for email in calendly_emails:
+            if email in df_monday['Email'].values:
+                df_monday.loc[df_monday['Email'] == email, 'origin'] = 'cold-email'
+                matches += 1
+        
+        logger.info(f"Found {matches} email matches between Calendly and Monday.com data")
+        
+        # Save the merged data back to the latest file
+        # Convert back to the original JSON structure
+        merged_json_data = {}
+        for group_name in json_data.keys():
+            group_records = df_monday[df_monday['Data_Group'] == group_name].copy()
+            # Remove the Data_Group column before saving
+            group_records = group_records.drop('Data_Group', axis=1)
+            merged_json_data[group_name] = group_records.to_dict('records')
+        
+        # Save merged data
+        with latest_file.open("w", encoding="utf-8") as file:
+            json.dump(merged_json_data, file, indent=2)
+        
+        logger.info("Successfully merged Calendly data with Monday.com data")
+        
+        return jsonify({
+            "status": "success",
+            "message": f"Successfully merged data. Found {matches} email matches. Origin column added to Monday.com data.",
+            "calendly_records": len(df_calendly),
+            "monday_records": len(df_monday),
+            "email_matches": matches
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in merge_calendly_data: {e}")
+        logger.debug("Traceback:\n%s", traceback.format_exc())
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        })

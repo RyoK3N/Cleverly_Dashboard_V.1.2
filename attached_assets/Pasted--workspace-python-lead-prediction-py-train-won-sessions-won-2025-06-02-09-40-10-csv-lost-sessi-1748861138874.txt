@@ -1,0 +1,54 @@
+~/workspace$ python lead_prediction.py train --won sessions/won_2025-06-02_09-40-10.csv --lost sessions/lost_2025-06-02_09-40-10.csv
+2025-06-02 10:43:31 | INFO | 🔄 Loading data …
+2025-06-02 10:43:31 | INFO | ⚙️  Training …
+2025-06-02 10:43:35 | INFO | ✅ Model  → models/model_20250602_104335.joblib
+2025-06-02 10:43:35 | INFO | ✅ Meta   → models/metadata_20250602_104335.json
+2025-06-02 10:43:35 | INFO | 🏁 Accuracy = 0.8398
+~/workspace$ python lead_prediction.py predict \
+--model  models/model_20250602_104335.joblib \
+--meta   models/metadata_20250602_104335.json \
+--input  data/scheduled.csv \
+--output predictions.csv
+2025-06-02 10:44:27 | INFO | 🔄 Reading inference CSV …
+Traceback (most recent call last):
+  File "/home/runner/workspace/lead_prediction.py", line 217, in <module>
+    ns.func(ns)
+  File "/home/runner/workspace/lead_prediction.py", line 163, in cmd_predict
+    df_raw = pd.read_csv(ns.input)           # keep full copy
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pandas/io/parsers/readers.py", line 1026, in read_csv
+    return _read(filepath_or_buffer, kwds)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pandas/io/parsers/readers.py", line 620, in _read
+    parser = TextFileReader(filepath_or_buffer, **kwds)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pandas/io/parsers/readers.py", line 1620, in __init__
+    self._engine = self._make_engine(f, self.engine)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pandas/io/parsers/readers.py", line 1880, in _make_engine
+    self.handles = get_handle(
+                   ^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/pandas/io/common.py", line 873, in get_handle
+    handle = open(
+             ^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'data/scheduled.csv'
+~/workspace$ python lead_prediction.py predict \
+--model  models/model_20250602_104335.joblib \
+--meta   models/metadata_20250602_104335.json \
+--input  sessions/scheduled_2025-06-02_09-40-10.csv \
+--output predictions.csv
+2025-06-02 10:44:54 | INFO | 🔄 Reading inference CSV …
+2025-06-02 10:44:54 | INFO | 🔮 Scoring …
+/home/runner/workspace/lead_prediction.py:189: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise an error in a future version of pandas. Value '['Lost' 'Lost' 'Lost' 'Lost' 'Lost' 'Won' 'Lost' 'Lost' 'Won' 'Won' 'Lost'
+ 'Lost' 'Lost' 'Lost' 'Lost' 'Lost' 'Lost' 'Lost' 'Lost' 'Lost' 'Lost'
+ 'Lost' 'Lost' 'Lost' 'Won' 'Lost' 'Lost' 'Lost' 'Won' 'Won' 'Lost' 'Lost'
+ 'Lost' 'Lost' 'Lost' 'Lost' 'Lost' 'Lost' 'Lost' 'Lost']' has dtype incompatible with float64, please explicitly cast to a compatible dtype first.
+  df_out.loc[X.index, "prediction"] = preds
+2025-06-02 10:44:54 | INFO | ✅ Predictions → predictions.csv
+~/workspace$ ls
+admin.db            instance            monday_extract_groups.py  sessions
+attached_assets     lead_prediction.py  pages                     static
+cancelled           logs                predictions.csv           test.py
+database.py         main.py             __pycache__               uv.lock
+generated-icon.png  models              pyproject.toml
+~/workspace$ 
