@@ -1,0 +1,60 @@
+~/workspace$ python predict_leads.py
+2025-07-14 22:21:35.001678: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:32] Could not find cuda drivers on your machine, GPU will not be used.
+2025-07-14 22:21:35.005426: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:32] Could not find cuda drivers on your machine, GPU will not be used.
+2025-07-14 22:21:35.013558: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:467] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1752531695.028280   22485 cuda_dnn.cc:8579] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1752531695.033049   22485 cuda_blas.cc:1407] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+W0000 00:00:1752531695.044335   22485 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1752531695.044354   22485 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1752531695.044362   22485 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1752531695.044368   22485 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+2025-07-14 22:21:35.047817: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2025-07-14 22:21:37.496031: E external/local_xla/xla/stream_executor/cuda/cuda_platform.cc:51] failed call to cuInit: INTERNAL: CUDA error: Failed call to cuInit: UNKNOWN ERROR (303)
+Traceback (most recent call last):
+  File "/home/runner/workspace/lp_model_training.py", line 470, in _load_model
+    self.model = tf.keras.models.load_model(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/keras/src/saving/saving_api.py", line 189, in load_model
+    return saving_lib.load_model(
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/keras/src/saving/saving_lib.py", line 370, in load_model
+    return _load_model_from_fileobj(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/keras/src/saving/saving_lib.py", line 447, in _load_model_from_fileobj
+    model = _model_from_config(
+            ^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/keras/src/saving/saving_lib.py", line 436, in _model_from_config
+    model = deserialize_keras_object(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/keras/src/saving/serialization_lib.py", line 718, in deserialize_keras_object
+    instance = cls.from_config(inner_config)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/keras/src/models/model.py", line 651, in from_config
+    return functional_from_config(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/keras/src/models/functional.py", line 627, in functional_from_config
+    return cls(
+           ^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/keras/src/utils/tracking.py", line 26, in wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/keras/src/models/functional.py", line 136, in __init__
+    Function.__init__(self, inputs, outputs, name=name)
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/keras/src/ops/function.py", line 89, in __init__
+    raise ValueError("`inputs` not connected to `outputs`")
+ValueError: `inputs` not connected to `outputs`
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/runner/workspace/predict_leads.py", line 8, in <module>
+    predictor = Predictor(best_pth, data_module)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/lp_model_training.py", line 463, in __init__
+    self._load_model()
+  File "/home/runner/workspace/lp_model_training.py", line 479, in _load_model
+    raise ModelError(f"Failed to load model: {str(e)}")
+lp_model_training.ModelError: Failed to load model: `inputs` not connected to `outputs`
+~/workspace$ 
