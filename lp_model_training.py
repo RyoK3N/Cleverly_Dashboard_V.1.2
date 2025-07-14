@@ -417,8 +417,8 @@ class Trainer:
 
                 log.info(f"Fold {fold} AUC: {auc:.4f}")
 
-                model_path = self.model_dir / f"leadnet_fold{fold}"
-                model.save(model_path, save_format='tf', include_optimizer=False)
+                model_path = self.model_dir / f"leadnet_fold{fold}.keras"
+                model.save(model_path, include_optimizer=False)
 
             except Exception as e:
                 log.error(f"Error in fold {fold}: {str(e)}")
@@ -428,12 +428,10 @@ class Trainer:
             raise ModelError("No successful folds completed")
 
         best_fold = int(np.argmax(aucs)) + 1
-        best_model_path = self.model_dir / f"leadnet_fold{best_fold}"
-        target_path = self.model_dir / "leadnet_best"
+        best_model_path = self.model_dir / f"leadnet_fold{best_fold}.keras"
+        target_path = self.model_dir / "leadnet_best.keras"
 
-        # Use shutil.copytree to copy the directory
-        import shutil
-        shutil.copytree(best_model_path, target_path, dirs_exist_ok=True)
+        target_path.write_bytes(best_model_path.read_bytes())
 
         mean_auc = float(np.mean(aucs))
         std_auc = float(np.std(aucs))
@@ -521,7 +519,7 @@ def main():
         log.info(f"Training completed: {metrics}")
 
         log.info("Testing inference...")
-        best_model_path = trainer.model_dir / "leadnet_best"
+        best_model_path = trainer.model_dir / "leadnet_best.keras"
         predictor = Predictor(best_model_path, data_module)
 
         example = {
