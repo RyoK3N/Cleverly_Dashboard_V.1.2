@@ -1058,6 +1058,18 @@ def process_data_Google_Ads(dataframes: dict[str, pd.DataFrame], st_date: str,
 
     # ── Combine all stages into one DataFrame ────────────────────────────
     all_stages = pd.concat([op_cancelled, op_lost, op_noshow, op_proposal, op_scheduled, op_unqualified, op_won], ignore_index=True)
+    
+    def _filter(df: pd.DataFrame, date_col: str) -> pd.DataFrame:
+        if date_col not in df.columns:
+            return pd.DataFrame(columns=df.columns)
+
+        dates = pd.to_datetime(df[date_col].apply(extract_date),
+                               errors="coerce").dt.date
+        mask = ((dates >= pd.to_datetime(st_date).date()) &
+                (dates <= pd.to_datetime(end_date).date()))
+        return df.loc[mask]
+
+    fdate = _filter  # alias
 
     # ── Apply date filter if data exists ─────────────────────────────────
     if not all_stages.empty and filter_column in all_stages.columns:
