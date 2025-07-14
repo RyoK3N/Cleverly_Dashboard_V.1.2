@@ -177,8 +177,27 @@ class DataModule:
         if df.empty:
             raise ValidationError("Input DataFrame is empty")
 
-        dummy_y = np.zeros(len(df), dtype=np.float32)
-        return self._create_dataset(df, dummy_y, shuffle=False, drop_target=True)
+        # Create feature dictionary format that matches model input structure
+        features = {}
+        
+        # Add categorical features
+        for col in CATEGORICAL:
+            if col in df.columns:
+                features[f"{col}_str"] = df[col].fillna("Unknown").astype(str).to_numpy()
+            else:
+                features[f"{col}_str"] = np.full(len(df), "Unknown", dtype=str)
+
+        # Add numeric features
+        if self.num_cols:
+            numeric_data = df[self.num_cols].fillna(0).to_numpy(dtype=np.float32)
+        else:
+            numeric_data = np.zeros((len(df), 1), dtype=np.float32)
+        
+        features["numeric"] = numeric_data
+
+        # Create dataset from feature dictionary
+        ds = tf.data.Dataset.from_tensor_slices(features)
+        return ds.batch(self.batch_size).prefetch(tf.data.AUTOTUNE)
 
     def _create_dataset(
         self,
@@ -187,31 +206,28 @@ class DataModule:
         shuffle: bool,
         drop_target: bool = False
     ) -> tf.data.Dataset:
-        # Create ordered feature list to match model input order
-        features = []
+        # Create feature dictionary format that matches model input structure
+        features = {}
         
-        # Ensure categorical features are in the exact same order as CATEGORICAL
+        # Add categorical features with proper naming
         for col in CATEGORICAL:
             if col in df.columns:
-                features.append(df[col].fillna("Unknown").astype(str).to_numpy())
+                features[f"{col}_str"] = df[col].fillna("Unknown").astype(str).to_numpy()
             else:
-                features.append(np.full(len(df), "Unknown", dtype=str))
+                features[f"{col}_str"] = np.full(len(df), "Unknown", dtype=str)
 
-        # Add numeric features last
+        # Add numeric features
         if self.num_cols:
             numeric_data = df[self.num_cols].fillna(0).to_numpy(dtype=np.float32)
         else:
             numeric_data = np.zeros((len(df), 1), dtype=np.float32)
-
-        features.append(numeric_data)
-
-        # Convert features list to tuple for TensorFlow compatibility
-        features_tuple = tuple(features)
+        
+        features["numeric"] = numeric_data
         
         if drop_target:
-            ds = tf.data.Dataset.from_tensor_slices(features_tuple)
+            ds = tf.data.Dataset.from_tensor_slices(features)
         else:
-            ds = tf.data.Dataset.from_tensor_slices((features_tuple, y))
+            ds = tf.data.Dataset.from_tensor_slices((features, y))
 
         if shuffle:
             ds = ds.shuffle(len(df), seed=SEED, reshuffle_each_iteration=True)
