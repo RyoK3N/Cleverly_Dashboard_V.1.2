@@ -201,10 +201,13 @@ class DataModule:
 
         features.append(numeric_data)
 
+        # Convert features list to tuple for TensorFlow compatibility
+        features_tuple = tuple(features)
+        
         if drop_target:
-            ds = tf.data.Dataset.from_tensor_slices(features)
+            ds = tf.data.Dataset.from_tensor_slices(features_tuple)
         else:
-            ds = tf.data.Dataset.from_tensor_slices((features, y))
+            ds = tf.data.Dataset.from_tensor_slices((features_tuple, y))
 
         if shuffle:
             ds = ds.shuffle(len(df), seed=SEED, reshuffle_each_iteration=True)
