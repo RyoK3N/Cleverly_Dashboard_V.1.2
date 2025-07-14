@@ -740,6 +740,7 @@ def process_data(dataframes: dict[str, pd.DataFrame], st_date: str,
     # ───────────────────────────────────────────────────────────────────────
     #Count the number of cold emails in origin column and group by owner
     cold_emails = all_stages[all_stages['origin'] == 'cold-email']
+    cold_emails_fdate = fdate(cold_emails, filter_column)
     kpi["Cold Emails"] = cold_emails.groupby("Owner").size().reindex(
         kpi.index, fill_value=0)
 
@@ -933,7 +934,8 @@ def process_data_COLD_EMAIL(dataframes: dict[str, pd.DataFrame], st_date: str,
     # ───────────────────────────────────────────────────────────────────────
     #Count the number of cold emails in origin column and group by owner
     cold_emails = all_stages[all_stages['origin'] == 'cold-email']
-    kpi["Cold Emails"] = cold_emails.groupby("Owner").size().reindex(
+    cold_emails_fdate = fdate(cold_emails, filter_column)
+    kpi["Cold Emails"] = cold_emails_fdate.groupby("Owner").size().reindex(
     kpi.index, fill_value=0)
     
     #Count the number of linkedin in origin column and group by owner

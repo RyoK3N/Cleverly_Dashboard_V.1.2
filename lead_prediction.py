@@ -1,22 +1,35 @@
+#!/usr/bin/env python3
+"""
+lead_prediction.py – Train & score lead win/loss with confidence.
+
+Usage
+-----
+# train
+python lead_prediction.py train --won data/won.csv --lost data/lost.csv
+
+# predict
+python lead_prediction.py predict \
+    --model models/model_x.joblib --meta models/metadata_x.json \
+    --input data/scheduled.csv     --output predictions.csv
+"""
+
+# ───────── IMPORTS ───────── #
+import argparse, json, logging, os
 from datetime import datetime
-import json
-import os
-import cloudpickle
 from typing import Tuple, List
 
+import joblib
 import numpy as np
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
-from sklearn.metrics import accuracy_score, classification_report, roc_auc_score
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn.ensemble import HistGradientBoostingClassifier
-import argparse
-import logging
 
-# Logging
+# ───────── LOGGING ───────── #
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(message)s",
@@ -25,7 +38,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-# Data Preprocessor
+# ──────── DATA PREP ──────── #
 class DataPreprocessor:
     UNNEEDED = {
         "Follow Up Tracker", "Notes", "Email Template #1", "Email Template #2",
@@ -54,7 +67,7 @@ class DataPreprocessor:
         return df.drop(columns=["Deal Status"]), df["Deal Status"]
 
 
-# Model Class
+# ──────── MODEL ──────── #
 class LeadStatusModel:
 
     def __init__(self, model_dir: str = "models") -> None:
@@ -64,10 +77,9 @@ class LeadStatusModel:
         self.metadata: dict = {}
 
     def _build_pipeline(self, X: pd.DataFrame) -> None:
-        num_cols = X.select_dtypes(
-            include=["int64", "float64"]).columns.tolist()
-        cat_cols = X.select_dtypes(
-            include=["object", "category", "bool"]).columns.tolist()
+        num_cols = X.select_dtypes(["int64", "float64"]).columns.tolist()
+        cat_cols = X.select_dtypes(["object", "category",
+                                    "bool"]).columns.tolist()
 
         pre = ColumnTransformer([
             ("num",
@@ -75,18 +87,17 @@ class LeadStatusModel:
                        ("sc", StandardScaler())]), num_cols),
             ("cat",
              Pipeline([("imp", SimpleImputer(strategy="most_frequent")),
-                       ("oh",
-                        OneHotEncoder(handle_unknown="ignore",
-                                      sparse_output=False))]), cat_cols)
+                       ("oh", OneHotEncoder(handle_unknown="ignore"))]),
+             cat_cols)
         ])
 
-        self.pipeline = Pipeline([
-            ("preprocessor", pre),
-            ("clf", HistGradientBoostingClassifier(random_state=42))
-        ])
+        self.pipeline = Pipeline([("preprocessor", pre),
+                                  ("clf", LogisticRegression(max_iter=1000))])
 
+    # ---- API ---- #
     def train(self, X: pd.DataFrame, y: pd.Series) -> dict:
         self._build_pipeline(X)
+
         X_tr, X_te, y_tr, y_te = train_test_split(X,
                                                   y,
                                                   test_size=0.2,
@@ -94,7 +105,6 @@ class LeadStatusModel:
                                                   stratify=y)
         self.pipeline.fit(X_tr, y_tr)
         y_pred = self.pipeline.predict(X_te)
-        y_proba = self.pipeline.predict_proba(X_te)[:, 1]
 
         pre = self.pipeline.named_steps["preprocessor"]
         self.metadata = {
@@ -102,8 +112,6 @@ class LeadStatusModel:
             "metrics": {
                 "accuracy":
                 float(accuracy_score(y_te, y_pred)),
-                "roc_auc":
-                float(roc_auc_score(y_te, y_proba)),
                 "classification_report":
                 classification_report(y_te, y_pred, output_dict=True)
             },
@@ -122,62 +130,68 @@ class LeadStatusModel:
 
     def save(self) -> Tuple[str, str]:
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-        m_path = os.path.join(self.model_dir, f"model_{ts}.pkl")
+        m_path = os.path.join(self.model_dir, f"model_{ts}.joblib")
         j_path = os.path.join(self.model_dir, f"metadata_{ts}.json")
-        with open(m_path, 'wb') as f:
-            cloudpickle.dump(self.pipeline, f)
-        with open(j_path, 'w') as f:
-            json.dump(self.metadata, f, indent=2)
+        joblib.dump(self.pipeline, m_path)
+        json.dump(self.metadata, open(j_path, "w"), indent=2)
         return m_path, j_path
 
     def load(self, model_path: str, meta_path: str) -> None:
-        with open(model_path, 'rb') as f:
-            self.pipeline = cloudpickle.load(f)
-        with open(meta_path, 'r') as f:
-            self.metadata = json.load(f)
+        self.pipeline = joblib.load(model_path)
+        self.metadata = json.load(open(meta_path))
 
 
-# CLI
+# ──────── CLI ──────── #
 def cmd_train(ns: argparse.Namespace) -> None:
     prep, model = DataPreprocessor(), LeadStatusModel(ns.model_dir)
+
     logger.info("🔄 Loading data …")
     df = prep.load_and_clean(ns.won, ns.lost)
     X, y = prep.split_xy(df)
+
     logger.info("⚙️  Training …")
     metrics = model.train(X, y)
+
     m_path, j_path = model.save()
     logger.info("✅ Model  → %s", m_path)
     logger.info("✅ Meta   → %s", j_path)
-    logger.info("🏁 Accuracy = %.4f | AUC = %.4f", metrics["accuracy"],
-                metrics["roc_auc"])
+    logger.info("🏁 Accuracy = %.4f", metrics["accuracy"])
 
 
 def cmd_predict(ns: argparse.Namespace) -> None:
     prep, model = DataPreprocessor(), LeadStatusModel()
     model.load(ns.model, ns.meta)
+
     logger.info("🔄 Reading inference CSV …")
-    df_raw = pd.read_csv(ns.input)
-    X = prep._clean(df_raw.copy())
-    want: List[str] = model.metadata["raw_numeric_cols"] + model.metadata[
-        "raw_categorical_cols"]
+    df_raw = pd.read_csv(ns.input)  # keep full copy
+    X = prep._clean(df_raw.copy())  # cleaned subset (rows can drop)
+
+    # reconcile columns
+    want: List[str] = model.metadata["raw_numeric_cols"] + \
+                      model.metadata["raw_categorical_cols"]
     for col in want:
         if col not in X.columns:
             X[col] = np.nan
     X = X.reindex(columns=want)
+
     if X.empty:
         logger.error("No rows left after cleaning; nothing to predict.")
         df_raw["prediction"] = np.nan
         df_raw["prediction_confidence"] = np.nan
         df_raw.to_csv(ns.output, index=False)
         return
+
     logger.info("🔮 Scoring …")
     preds = model.predict(X)
     conf = model.predict_proba(X).max(axis=1)
+
+    # prepare output
     df_out = df_raw.copy()
     df_out["prediction"] = np.nan
     df_out["prediction_confidence"] = np.nan
     df_out.loc[X.index, "prediction"] = preds
     df_out.loc[X.index, "prediction_confidence"] = conf
+
     df_out.to_csv(ns.output, index=False)
     logger.info("✅ Predictions → %s", ns.output)
 
@@ -185,6 +199,7 @@ def cmd_predict(ns: argparse.Namespace) -> None:
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Lead win/loss prediction CLI")
     sub = p.add_subparsers(dest="cmd", required=True)
+
     t = sub.add_parser("train", help="train new model")
     t.add_argument("--won", required=True, help="CSV of WON deals")
     t.add_argument("--lost", required=True, help="CSV of LOST deals")
@@ -192,7 +207,7 @@ def build_parser() -> argparse.ArgumentParser:
     t.set_defaults(func=cmd_train)
 
     pr = sub.add_parser("predict", help="run inference")
-    pr.add_argument("--model", required=True, help="*.pkl path")
+    pr.add_argument("--model", required=True, help="*.joblib path")
     pr.add_argument("--meta", required=True, help="metadata JSON path")
     pr.add_argument("--input", required=True, help="CSV of new leads")
     pr.add_argument("--output",

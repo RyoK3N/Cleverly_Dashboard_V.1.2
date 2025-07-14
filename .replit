@@ -3,7 +3,7 @@ run = "python -m main.py"
 
 [nix]
 channel = "stable-24_05"
-packages = ["glibcLocales"]
+packages = ["glibcLocales", "imagemagick_light"]
 
 [unitTest]
 language = "python3"
