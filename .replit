@@ -1,4 +1,4 @@
-modules = ["postgresql-16", "python-3.11", "python-3.12.2", "web"]
+modules = ["web", "python-3.11", "postgresql-16"]
 run = "python -m main.py"
 
 [nix]
@@ -25,7 +25,7 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python3 main.py"
+args = "python main.py"
 
 [[ports]]
 localPort = 5000
