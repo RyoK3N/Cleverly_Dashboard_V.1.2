@@ -92,6 +92,9 @@
                         <a class="nav-link" href="/data">Cold-Email</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="/google-ads">Google Ads</a>
+                    </li>
+                    <li class="nav-item">
                          <a class="nav-link" href="/logout">Logout</a>
                     </li>
                 </ul>
@@ -214,7 +217,7 @@
         const start_date = new Date('2024-01-01');
         $('#start_date').val(start_date.toISOString().split('T')[0]);
         $('#end_date').val(end_date.toISOString().split('T')[0]);
-        
+
         // Populate owners on page load
         $(document).ready(function() {
             populateOwners();

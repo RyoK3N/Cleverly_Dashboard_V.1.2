@@ -341,16 +341,16 @@
         $(document).ready(function() {
             // Populate owners dropdown when page loads
             populateOwners();
-            
+
             // Handle owner filter apply button
             $('#apply-owners-filter').click(function() {
                 applyFilters();
             });
-            
+
             // Handle Calendly data fetch button
             $('#download-calendly-button').click(function() {
                 showLoading('Fetching Calendly data...');
-                
+
                 fetch('/fetch-calendly-data', {
                     method: 'POST'
                 })
@@ -371,7 +371,7 @@
                     hideLoading();
                 });
             });
-            
+
             // Populate owners again when new data is fetched
             $('#fetch-btn').click(function() {
                 showLoading('Fetching data...');
@@ -602,15 +602,15 @@
                                     initComplete: function() {
                                         // Add custom styling to the Total row
                                         $('#data-table table tbody tr:last-child').addClass('table-warning');
-                                        
+
                                         // Add search to individual columns
                                         this.api().columns().every(function() {
                                             var column = this;
                                             var title = $(column.header()).text();
-                                            
+
                                             if (title !== '') {
                                                 $(column.header()).append('<br><input type="text" placeholder="Filter ' + title + '" style="width:100%;font-size:10px;margin-top:5px;" />');
-                                                
+
                                                 $('input', column.header()).on('keyup change clear', function() {
                                                     if (column.search() !== this.value) {
                                                         column.search(this.value).draw();
