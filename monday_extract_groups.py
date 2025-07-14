@@ -1073,7 +1073,7 @@ def process_data_Google_Ads(dataframes: dict[str, pd.DataFrame], st_date: str,
 
     # ── Apply date filter if data exists ─────────────────────────────────
     if not all_stages.empty and filter_column in all_stages.columns:
-        all_stages = fdate(all_stages, filter_column, st_date, end_date)
+        all_stages = fdate(all_stages, filter_column)
 
     # ── Group by UTM Campaign and count occurrences ─────────────────────
     if not all_stages.empty and 'UTM Campaign' in all_stages.columns:
