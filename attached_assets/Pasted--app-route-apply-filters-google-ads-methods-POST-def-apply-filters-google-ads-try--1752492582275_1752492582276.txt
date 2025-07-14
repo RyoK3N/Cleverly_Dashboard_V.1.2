@@ -1,0 +1,52 @@
+@app.route('/apply_filters_google_ads', methods=['POST'])
+def apply_filters_google_ads():
+    try:
+        logger.info("Starting apply_filters_cold_email")
+        # Identify the latest data file in the sessions folder
+        SESSION_DIR = Path("./sessions/sessions")
+        data_files = [
+            f for f in SESSION_DIR.glob("data_*.json") if f.is_file()
+        ]
+        logger.info(f"Found {len(data_files)} data files")
+        latest_file = max(data_files,
+                          key=lambda f: f.stat().st_mtime,
+                          default=None)
+
+        if not latest_file:
+            return jsonify({
+                "status":
+                "error",
+                "message":
+                "No data files found in the session directory."
+            })
+
+        logger.info(f"Loading data from {latest_file}")
+        with latest_file.open("r", encoding="utf-8") as file:
+            json_data = json.load(file)
+            # Convert JSON data into DataFrames and filter by origin='cold-email'
+            data = {}
+            for key, items in json_data.items():
+                df = pd.DataFrame(items)
+                # Filter only cold-email origin data
+                if 'UTM Source' in df.columns:
+                    df_filtered = df[df['UTM Source'] == 'google-ads']
+                    logger.info(f"Group {key}: {len(df)} total rows, {len(df_filtered)} cold-email rows")
+                else:
+                    # If no origin column, assume no cold-email data
+                    df_filtered = pd.DataFrame(columns=df.columns)
+                    logger.info(f"Group {key}: No origin column found, using empty DataFrame")
+
+                data[key] = df_filtered
+
+        st_date = request.json.get('start_date', '1900-01-01').strip()
+        end_date = request.json.get('end_date', '2100-12-31').strip()
+        filter_column = request.json.get('filter_column', 'Sales Call Date')
+        if not filter_column:
+            filter_column = 'Sales Call Date'  # Default value if none provided
+        logger.info(
+            f"Processing cold-email data with date range {st_date} to {end_date} on column {filter_column}"
+        )
+        selected_owners = request.json.get('selected_owners', [])
+
+        # Process the filtered data (only cold-email origin)
+        campaing_df , content_df  = process_data_Google_Ads(data, st_date, end_date, filter_column)

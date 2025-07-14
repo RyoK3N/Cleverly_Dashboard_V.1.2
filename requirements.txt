@@ -3,3 +3,5 @@ flask_sqlalchemy
 openai
 flask_login
 requests
+scikit-learn
+joblib

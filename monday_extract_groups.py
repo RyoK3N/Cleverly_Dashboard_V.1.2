@@ -1044,4 +1044,29 @@ def process_data_COLD_EMAIL(dataframes: dict[str, pd.DataFrame], st_date: str,
     return kpi_final
 
 
+def process_data_Google_Ads(dataframes: dict[str, pd.DataFrame], st_date: str,
+     end_date: str, filter_column: str):
+
+    # ── unpack individual stages (empty DF if missing) ────────────────────
+    op_cancelled = dataframes.get("cancelled", pd.DataFrame())
+    op_lost = dataframes.get("lost", pd.DataFrame())
+    op_noshow = dataframes.get("noshow", pd.DataFrame())
+    op_proposal = dataframes.get("proposal", pd.DataFrame())
+    op_scheduled = dataframes.get("scheduled", pd.DataFrame())
+    op_unqualified = dataframes.get("unqualified", pd.DataFrame())
+    op_won = dataframes.get("won", pd.DataFrame())
+
+
+    # ── lets group this data by UTM Campaigns and Display the Campaigns as index ──
+
+    df_campaigns = pd.concat([op_cancelled, op_lost, op_noshow, op_proposal, op_scheduled, op_unqualified, op_won])
+
+    df_campaigns = df_campaigns.groupby('UTM Campaign').size().reset_index
+
+    # ───────────────────────────────────────────────────────────────────────
+
+    df_content = df_campaigns.groupby('UTM Content').size().reset_index
+
+    return df_campaigns, df_content
+
 
