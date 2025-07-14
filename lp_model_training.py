@@ -188,12 +188,14 @@ class DataModule:
         # Create ordered feature list to match model input order
         features = []
         
+        # Ensure categorical features are in the exact same order as CATEGORICAL
         for col in CATEGORICAL:
             if col in df.columns:
                 features.append(df[col].fillna("Unknown").astype(str).to_numpy())
             else:
                 features.append(np.full(len(df), "Unknown", dtype=str))
 
+        # Add numeric features last
         if self.num_cols:
             numeric_data = df[self.num_cols].fillna(0).to_numpy(dtype=np.float32)
         else:
@@ -329,7 +331,7 @@ class ModelFactory:
             name="output"
         )(tf.keras.layers.Concatenate(name="combined")([wide_features, x]))
 
-        # Create ordered input list to ensure consistent connectivity
+        # Create ordered input list to ensure consistent connectivity with dataset
         input_list = []
         for col in CATEGORICAL:
             input_list.append(cat_inputs[col])
