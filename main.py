@@ -743,6 +743,14 @@ def google_ads():
     return render_template("google-ads.html")
 
 
+@app.route('/linkedin')
+@login_required
+def linkedin():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+    return render_template("linkedin.html")
+
+
 @app.route('/generate_predictions', methods=['POST'])
 @login_required
 def generate_predictions():

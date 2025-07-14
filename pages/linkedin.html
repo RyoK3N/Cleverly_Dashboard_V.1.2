@@ -1,9 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+
+<!doctype html>
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cleverly Sales Dashboard - Cold Email</title>
+    <title>Cleverly Sales Dashboard</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/fixedfooter/3.3.1/css/fixedFooter.dataTables.min.css">
@@ -71,7 +70,7 @@
             font-size: 13px;
         }
         .table th {
-            background: linear-gradient(135deg, #007bff, #0056b3);
+            background: linear-gradient(135deg, #0077B5, #005885);
             color: white;
             padding: 12px 8px;
             font-weight: 600;
@@ -96,7 +95,14 @@
             transform: scale(1.01);
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-
+        .table tbody tr:last-child {
+            background-color: #e3f2fd !important;
+            font-weight: bold;
+            border-top: 2px solid #0077B5;
+        }
+        .table tbody tr:last-child:hover {
+            background-color: #bbdefb !important;
+        }
         .table-responsive {
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
@@ -122,8 +128,8 @@
             padding: 8px 12px;
         }
         .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-            background: #007bff !important;
-            border-color: #007bff !important;
+            background: #0077B5 !important;
+            border-color: #0077B5 !important;
             color: white !important;
         }
         .numeric-cell {
@@ -141,13 +147,18 @@
     </style>
 </head>
 <body>
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
+        <div class="container-lg">
             <a class="navbar-brand" href="#">Cleverly Sales Dashboard</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+            <button class="navbar-toggler" type="button" data-toggle="collapse"
+                    data-target="#navbarSupportedContent"
+                    aria-controls="navbarSupportedContent"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="/dashboard">Dashboard</a>
@@ -158,17 +169,17 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/predictions">Predictions</a>
                     </li>
-                    <li class="nav-item active">
-                        <a class="nav-link" href="/data">Cold-Email <span class="sr-only">(current)</span></a>
-                    </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/linkedin">LinkedIn</a>
+                        <a class="nav-link" href="/data">Cold-Email</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/linkedin">LinkedIn <span class="sr-only">(current)</span></a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/google-ads">Google Ads</a>
                     </li>
                     <li class="nav-item">
-                         <a class="nav-link" href="/logout">Logout</a>
+                        <a class="nav-link" href="/logout">Logout</a>
                     </li>
                 </ul>
             </div>
@@ -176,12 +187,13 @@
     </nav>
 
     <div class="container-lg mt-4">
+        <!-- Data Controls -->
         <div class="row">
             <div class="col-12">
                 <div class="card mb-4">
                     <div class="card-body">
-                        <h3 class="card-title">Cold-Email Performance Dashboard</h3>
-                        <p class="lead">Track and analyze your cold-email campaigns performance metrics</p>
+                        <h3 class="card-title">LinkedIn Data Analysis</h3>
+                        <p class="text-muted">Analyze leads originating from LinkedIn campaigns and outreach</p>
                         <form id="filter-form">
                             <div class="form-row">
                                 <div class="form-group col-md-3">
@@ -201,7 +213,7 @@
                                     </select>
                                 </div>
                                 <div class="form-group col-md-3 align-self-end">
-                                    <button type="submit" class="btn btn-success btn-block">Apply Filter</button>
+                                    <button type="submit" class="btn btn-primary btn-block">Analyze LinkedIn Data</button>
                                 </div>
                             </div>
                         </form>
@@ -214,7 +226,7 @@
             <div class="col-12">
                 <div class="card mb-4">
                     <div class="card-body">
-                        <h3 class="card-title">Results (Cold-Email Only)</h3>
+                        <h3 class="card-title">Results</h3>
                         <div class="form-group mb-3">
                             <label>Select Owners to Display:</label>
                             <div id="owners-checkbox-container" class="border p-3 rounded" style="max-height: 200px; overflow-y: auto;">
@@ -232,7 +244,7 @@
             <div class="col-12">
                 <div class="card mb-4">
                     <div class="card-body">
-                        <h3 class="card-title">Cold-Email Performance Charts</h3>
+                        <h3 class="card-title">LinkedIn Performance Charts</h3>
                         <div class="row">
                             <div class="col-md-6 mb-4">
                                 <div class="card">
@@ -328,16 +340,10 @@
             });
         }
 
-        // Set default dates
-        const end_date = new Date('2025-12-31');
-        const start_date = new Date('2024-01-01');
-        $('#start_date').val(start_date.toISOString().split('T')[0]);
-        $('#end_date').val(end_date.toISOString().split('T')[0]);
-
         $(document).ready(function() {
             // Populate owners dropdown when page loads
             populateOwners();
-
+            
             // Handle owner filter apply button
             $('#apply-owners-filter').click(function() {
                 applyFilters();
@@ -352,7 +358,7 @@
 
         // Define applyFilters globally
         function applyFilters() {
-            showLoading('Processing cold-email data...');
+            showLoading('Processing LinkedIn data...');
 
             const startDate = $('#start_date').val();
             const endDate = $('#end_date').val();
@@ -368,7 +374,7 @@
             };
 
             $.ajax({
-                url: '/apply_filters_cold_email',
+                url: '/apply_filters_LinkedIn',
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(data),
@@ -403,10 +409,10 @@
 
                             // Extract data for charts
                             const owners = data.map(row => row[headers.indexOf('Owner')]);
-                            const newCalls = data.map(row => parseFloat(row[headers.indexOf('New Calls Booked')]) || 0);
-                            const salesCalls = data.map(row => parseFloat(row[headers.indexOf('Sales Call Taken')]) || 0);
-                            const revenuePerCall = data.map(row => parseFloat(row[headers.indexOf('Revenue Per Call $')]) || 0);
-                            const closedRevenue = data.map(row => parseFloat(row[headers.indexOf('Closed Revenue $')]) || 0);
+                            const newCalls = data.map(row => parseFloat(row[headers.indexOf('New Calls Booked')]));
+                            const salesCalls = data.map(row => parseFloat(row[headers.indexOf('Sales Call Taken')]));
+                            const revenuePerCall = data.map(row => parseFloat(row[headers.indexOf('Revenue Per Call $')]));
+                            const closedRevenue = data.map(row => parseFloat(row[headers.indexOf('Closed Revenue $')]));
 
                             // Show charts container
                             $('#charts-container').fadeIn();
@@ -414,39 +420,37 @@
                             // Function to create/update chart
                             function createOrUpdateChart(canvasId, label, data, color) {
                                 const canvas = document.getElementById(canvasId);
-                                if (canvas && canvas.chart) {
+                                if (canvas.chart) {
                                     canvas.chart.destroy();
                                 }
-                                if (canvas) {
-                                    canvas.chart = new Chart(canvas, {
-                                        type: 'bar',
-                                        data: {
-                                            labels: owners,
-                                            datasets: [{
-                                                label: label,
-                                                data: data,
-                                                backgroundColor: color
-                                            }]
-                                        },
-                                        options: {
-                                            responsive: true,
-                                            scales: {
-                                                y: {
-                                                    beginAtZero: true
-                                                }
+                                canvas.chart = new Chart(canvas, {
+                                    type: 'bar',
+                                    data: {
+                                        labels: owners,
+                                        datasets: [{
+                                            label: label,
+                                            data: data,
+                                            backgroundColor: color
+                                        }]
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        scales: {
+                                            y: {
+                                                beginAtZero: true
                                             }
                                         }
-                                    });
-                                }
-                                return canvas ? canvas.chart : null;
+                                    }
+                                });
+                                return canvas.chart;
                             }
 
                             // Create/update all charts
-                            createOrUpdateChart('newCallsChart', 'New Calls Booked', newCalls, 'rgba(75, 192, 192, 0.6)');
-                            createOrUpdateChart('salesCallsChart', 'Sales Calls Taken', salesCalls, 'rgba(153, 102, 255, 0.6)');
-                            createOrUpdateChart('revenuePerCallChart', 'Revenue per Call ($)', revenuePerCall, 'rgba(255, 159, 64, 0.6)');
-                            createOrUpdateChart('closedRevenueChart', 'Closed Revenue ($)', closedRevenue, 'rgba(255, 99, 132, 0.6)');
-                            createOrUpdateChart('closeRateChart', 'Close Rate (%)', data.map(row => parseFloat(row[headers.indexOf('Close Rate %')]) || 0), 'rgba(54, 162, 235, 0.6)');
+                            createOrUpdateChart('newCallsChart', 'New Calls Booked', newCalls, 'rgba(0, 119, 181, 0.6)');
+                            createOrUpdateChart('salesCallsChart', 'Sales Calls Taken', salesCalls, 'rgba(0, 119, 181, 0.8)');
+                            createOrUpdateChart('revenuePerCallChart', 'Revenue per Call ($)', revenuePerCall, 'rgba(0, 88, 133, 0.6)');
+                            createOrUpdateChart('closedRevenueChart', 'Closed Revenue ($)', closedRevenue, 'rgba(0, 88, 133, 0.8)');
+                            createOrUpdateChart('closeRateChart', 'Close Rate (%)', data.map(row => parseFloat(row[headers.indexOf('Close Rate %')])), 'rgba(0, 119, 181, 0.4)');
 
                             const tableElem = doc.querySelector('table');
                             tableElem.classList.add('table', 'table-striped', 'table-bordered', 'fade-in');
@@ -464,7 +468,7 @@
 
                             tableHtml = tableElem.outerHTML;
                             statusDiv.html(`
-                                <div class="alert alert-success mb-3">Cold-email data processed successfully!</div>
+                                <div class="alert alert-success mb-3">LinkedIn data processed successfully!</div>
                                 <div class="table-responsive" id="data-table"></div>
                             `).fadeIn(400, function() {
                                 if ($.fn.DataTable.isDataTable('#data-table table')) {
@@ -524,13 +528,7 @@
                                     columnDefs: [
                                         {
                                             targets: 0,
-                                            className: 'owner-cell',
-                                            createdCell: function(td, cellData, rowData, row, col) {
-                                                // Don't apply owner-cell class to Total row
-                                                if (cellData && cellData.toString().toLowerCase() === 'total') {
-                                                    $(td).removeClass('owner-cell');
-                                                }
-                                            }
+                                            className: 'owner-cell'
                                         },
                                         {
                                             targets: '_all',
@@ -554,14 +552,17 @@
                                         }
                                     ],
                                     initComplete: function() {
+                                        // Add custom styling to the Total row
+                                        $('#data-table table tbody tr:last-child').addClass('table-warning');
+                                        
                                         // Add search to individual columns
                                         this.api().columns().every(function() {
                                             var column = this;
                                             var title = $(column.header()).text();
-
+                                            
                                             if (title !== '') {
                                                 $(column.header()).append('<br><input type="text" placeholder="Filter ' + title + '" style="width:100%;font-size:10px;margin-top:5px;" />');
-
+                                                
                                                 $('input', column.header()).on('keyup change clear', function() {
                                                     if (column.search() !== this.value) {
                                                         column.search(this.value).draw();
@@ -569,17 +570,16 @@
                                                 });
                                             }
                                         });
-                                    },
-
+                                    }
                                 });
                             });
                         });
                     } else {
-                        alert(response.message);
+                        $('#status').html(`<div class="alert alert-danger">Error: ${response.message}</div>`);
                     }
                 },
                 error: function(){
-                    alert('Error applying filters');
+                    $('#status').html('<div class="alert alert-danger">Error applying filters</div>');
                 },
                 complete: function(){
                     hideLoading();
