@@ -185,20 +185,21 @@ class DataModule:
         shuffle: bool,
         drop_target: bool = False
     ) -> tf.data.Dataset:
-        features = {}
-
+        # Create ordered feature list to match model input order
+        features = []
+        
         for col in CATEGORICAL:
             if col in df.columns:
-                features[f"{col}_str"] = df[col].fillna("Unknown").astype(str).to_numpy()
+                features.append(df[col].fillna("Unknown").astype(str).to_numpy())
             else:
-                features[f"{col}_str"] = np.full(len(df), "Unknown", dtype=str)
+                features.append(np.full(len(df), "Unknown", dtype=str))
 
         if self.num_cols:
             numeric_data = df[self.num_cols].fillna(0).to_numpy(dtype=np.float32)
         else:
             numeric_data = np.zeros((len(df), 1), dtype=np.float32)
 
-        features["numeric"] = numeric_data
+        features.append(numeric_data)
 
         if drop_target:
             ds = tf.data.Dataset.from_tensor_slices(features)
@@ -325,8 +326,14 @@ class ModelFactory:
             name="output"
         )(tf.keras.layers.Concatenate(name="combined")([wide_features, x]))
 
+        # Create ordered input list to ensure consistent connectivity
+        input_list = []
+        for col in CATEGORICAL:
+            input_list.append(cat_inputs[col])
+        input_list.append(num_input)
+        
         model = tf.keras.Model(
-            inputs=[*cat_inputs.values(), num_input],
+            inputs=input_list,
             outputs=output,
             name="leadnet_wide_deep"
         )
