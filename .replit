@@ -1,4 +1,4 @@
-modules = ["web", "python-3.12", "postgresql-16"]
+modules = ["postgresql-16", "python-3.11", "python-3.12.2", "web"]
 run = "python -m main.py"
 
 [nix]
