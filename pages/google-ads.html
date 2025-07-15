@@ -88,6 +88,14 @@
             text-align: right;
             font-family: 'Courier New', monospace;
         }
+        .percentage-cell {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+        }
+        .owner-cell {
+            font-weight: 600;
+            color: #495057;
+        }
         .campaign-header {
             background: linear-gradient(135deg, #28a745, #20c997);
             color: white;
@@ -144,8 +152,7 @@
             <div class="col-12">
                 <div class="card mb-4">
                     <div class="card-body">
-                        <h3 class="card-title">Google Ads Data </h3>
-                        <p class="text-muted">Analyze leads from Google Ads campaigns , filtering them by UTM Campaign and UTM Content</p>
+                        <h3 class="card-title">Data Controls</h3>
                         <form id="filter-form">
                             <div class="form-row">
                                 <div class="form-group col-md-3">
@@ -165,21 +172,7 @@
                                     </select>
                                 </div>
                                 <div class="form-group col-md-3 align-self-end">
-                                    <button type="submit" class="btn btn-success btn-block">Analyze Google Ads</button>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group col-md-6">
-                                    <label for="owner_select">Select Owners (Optional):</label>
-                                    <select id="owner_select" name="owner_select" class="form-control" multiple>
-                                        <!-- Options will be populated via JavaScript -->
-                                    </select>
-                                    <small class="form-text text-muted">Hold Ctrl/Cmd to select multiple owners</small>
-                                </div>
-                                <div class="form-group col-md-6">
-                                    <div class="mt-4">
-                                        <button type="button" id="clear-owners" class="btn btn-outline-secondary">Clear Selection</button>
-                                    </div>
+                                    <button type="submit" class="btn btn-success btn-block">Apply Filter</button>
                                 </div>
                             </div>
                         </form>
@@ -188,13 +181,71 @@
             </div>
         </div>
 
-        <!-- Results Section -->
         <div class="row">
             <div class="col-12">
                 <div class="card mb-4">
                     <div class="card-body">
                         <h3 class="card-title">Results</h3>
+                        <div class="form-group mb-3">
+                            <label>Select Owners to Display:</label>
+                            <div id="owners-checkbox-container" class="border p-3 rounded" style="max-height: 200px; overflow-y: auto;">
+                            </div>
+                            <button id="apply-owners-filter" class="btn btn-primary mt-2">Apply Owner Filter</button>
+                        </div>
                         <div id="status"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="row" id="charts-container" style="display: none;">
+            <div class="col-12">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3 class="card-title">Performance Charts</h3>
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">New Calls Booked by Owner</h5>
+                                        <canvas id="newCallsChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Sales Calls Taken by Owner</h5>
+                                        <canvas id="salesCallsChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Revenue per Call by Owner</h5>
+                                        <canvas id="revenuePerCallChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Closed Revenue by Owner</h5>
+                                        <canvas id="closedRevenueChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Close Rate by Owner</h5>
+                                        <canvas id="closeRateChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -352,41 +403,36 @@
             return table;
         }
 
+        function populateOwners() {
+            $.get('/get_owners', function(data) {
+                const container = $('#owners-checkbox-container');
+                container.empty();
+                data.owners.forEach(owner => {
+                    container.append(`
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input owner-checkbox" id="owner-${owner}" value="${owner}">
+                            <label class="custom-control-label" for="owner-${owner}">${owner}</label>
+                        </div>
+                    `);
+                });
+            });
+        }
+
         $(document).ready(function() {
-            // Load owners on page load
-            loadOwners();
+            // Populate owners dropdown when page loads
+            populateOwners();
+            
+            // Handle owner filter apply button
+            $('#apply-owners-filter').click(function() {
+                applyFilters();
+            });
 
             // Form submit handler
             $('#filter-form').on('submit', function(e) {
                 e.preventDefault();
                 applyFilters();
             });
-
-            // Clear owners selection
-            $('#clear-owners').on('click', function() {
-                $('#owner_select').val([]);
-            });
         });
-
-        function loadOwners() {
-            $.ajax({
-                url: '/get_owners',
-                type: 'GET',
-                success: function(response) {
-                    const ownerSelect = $('#owner_select');
-                    ownerSelect.empty();
-                    
-                    if (response.owners && response.owners.length > 0) {
-                        response.owners.forEach(function(owner) {
-                            ownerSelect.append(`<option value="${owner}">${owner}</option>`);
-                        });
-                    }
-                },
-                error: function() {
-                    console.error('Failed to load owners');
-                }
-            });
-        }
 
         function applyFilters() {
             showLoading('Processing Google Ads data...');
@@ -394,7 +440,9 @@
             const startDate = $('#start_date').val();
             const endDate = $('#end_date').val();
             const filterColumn = $('#filter_column').val();
-            const selectedOwners = $('#owner_select').val() || [];
+            const selectedOwners = $('.owner-checkbox:checked').map(function() {
+                return $(this).val();
+            }).get();
 
             const data = {
                 start_date: startDate,
@@ -411,26 +459,182 @@
                 success: function(response) {
                     if (response.status === 'success') {
                         const statusDiv = $('#status');
+                        
+                        // Destroy existing DataTable if it exists
+                        if ($.fn.DataTable.isDataTable('#data-table table')) {
+                            $('#data-table table').DataTable().destroy();
+                        }
+                        // Clear existing charts
+                        document.querySelectorAll('canvas').forEach(canvas => {
+                            if (canvas.chart) {
+                                canvas.chart.destroy();
+                            }
+                        });
 
                         statusDiv.fadeOut(400, function() {
+                            let tableHtml = response.main_table;
+
+                            // Parse table data for charts
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(tableHtml, 'text/html');
+                            const table = doc.querySelector('table');
+                            
+                            if (table) {
+                                const headers = Array.from(table.querySelectorAll('th')).map(th => th.textContent.trim());
+                                const rows = Array.from(table.querySelectorAll('tbody tr')).map(tr => 
+                                    Array.from(tr.querySelectorAll('td')).map(td => td.textContent.trim())
+                                );
+
+                                // Filter out the "Total" row
+                                const data = rows.filter(row => row[0] !== 'Total');
+
+                                if (data.length > 0 && headers.includes('Owner')) {
+                                    // Extract data for charts
+                                    const owners = data.map(row => row[headers.indexOf('Owner')]);
+                                    const newCalls = data.map(row => parseFloat(row[headers.indexOf('New Calls Booked')]));
+                                    const salesCalls = data.map(row => parseFloat(row[headers.indexOf('Sales Call Taken')]));
+                                    const revenuePerCall = data.map(row => parseFloat(row[headers.indexOf('Revenue Per Call $')]));
+                                    const closedRevenue = data.map(row => parseFloat(row[headers.indexOf('Closed Revenue $')]));
+
+                                    // Show charts container
+                                    $('#charts-container').fadeIn();
+
+                                    // Function to create/update chart
+                                    function createOrUpdateChart(canvasId, label, data, color) {
+                                        const canvas = document.getElementById(canvasId);
+                                        if (canvas && canvas.chart) {
+                                            canvas.chart.destroy();
+                                        }
+                                        if (canvas) {
+                                            canvas.chart = new Chart(canvas, {
+                                                type: 'bar',
+                                                data: {
+                                                    labels: owners,
+                                                    datasets: [{
+                                                        label: label,
+                                                        data: data,
+                                                        backgroundColor: color
+                                                    }]
+                                                },
+                                                options: {
+                                                    responsive: true,
+                                                    scales: {
+                                                        y: {
+                                                            beginAtZero: true
+                                                        }
+                                                    }
+                                                }
+                                            });
+                                        }
+                                        return canvas ? canvas.chart : null;
+                                    }
+
+                                    // Create/update all charts
+                                    createOrUpdateChart('newCallsChart', 'New Calls Booked', newCalls, 'rgba(75, 192, 192, 0.6)');
+                                    createOrUpdateChart('salesCallsChart', 'Sales Calls Taken', salesCalls, 'rgba(153, 102, 255, 0.6)');
+                                    createOrUpdateChart('revenuePerCallChart', 'Revenue per Call ($)', revenuePerCall, 'rgba(255, 159, 64, 0.6)');
+                                    createOrUpdateChart('closedRevenueChart', 'Closed Revenue ($)', closedRevenue, 'rgba(255, 99, 132, 0.6)');
+                                    createOrUpdateChart('closeRateChart', 'Close Rate (%)', data.map(row => parseFloat(row[headers.indexOf('Close Rate %')])), 'rgba(54, 162, 235, 0.6)');
+                                }
+                            }
+
                             statusDiv.html(`
                                 <div class="alert alert-success mb-3">Google Ads data processed successfully!</div>
-                            `).fadeIn(400);
+                                <div class="table-responsive" id="data-table"></div>
+                            `).fadeIn(400, function() {
+                                if ($.fn.DataTable.isDataTable('#data-table table')) {
+                                    $('#data-table table').DataTable().destroy();
+                                }
+                                $('#data-table').html(tableHtml);
+                                
+                                const dataTable = $('#data-table table').DataTable({
+                                    scrollX: true,
+                                    scrollY: '60vh',
+                                    scrollCollapse: true,
+                                    paging: true,
+                                    pageLength: 25,
+                                    lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+                                    fixedHeader: true,
+                                    fixedColumns: {
+                                        leftColumns: 1
+                                    },
+                                    dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+                                         '<"row"<"col-sm-12"B>>' +
+                                         '<"row"<"col-sm-12"tr>>' +
+                                         '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+                                    buttons: [
+                                        {
+                                            extend: 'copy',
+                                            className: 'btn btn-sm btn-outline-primary'
+                                        },
+                                        {
+                                            extend: 'csv',
+                                            className: 'btn btn-sm btn-outline-success'
+                                        },
+                                        {
+                                            extend: 'excel',
+                                            className: 'btn btn-sm btn-outline-success'
+                                        },
+                                        {
+                                            extend: 'pdf',
+                                            className: 'btn btn-sm btn-outline-danger'
+                                        },
+                                        {
+                                            extend: 'print',
+                                            className: 'btn btn-sm btn-outline-info'
+                                        }
+                                    ],
+                                    order: [],
+                                    language: {
+                                        search: "",
+                                        searchPlaceholder: "Search owners, metrics...",
+                                        lengthMenu: "Show _MENU_ entries per page",
+                                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                                        paginate: {
+                                            first: "First",
+                                            last: "Last",
+                                            next: "Next",
+                                            previous: "Previous"
+                                        }
+                                    },
+                                    columnDefs: [
+                                        {
+                                            targets: 0,
+                                            className: 'owner-cell'
+                                        },
+                                        {
+                                            targets: '_all',
+                                            render: function(data, type, row, meta) {
+                                                if (type === 'display' && typeof data === 'number') {
+                                                    // Check if it's a percentage
+                                                    if (meta.settings.aoColumns[meta.col].sTitle.includes('%')) {
+                                                        return '<span class="percentage-cell">' + data.toFixed(1) + '%</span>';
+                                                    }
+                                                    // Check if it's a dollar amount
+                                                    else if (meta.settings.aoColumns[meta.col].sTitle.includes('$')) {
+                                                        return '<span class="numeric-cell">$' + data.toLocaleString() + '</span>';
+                                                    }
+                                                    // Regular number
+                                                    else {
+                                                        return '<span class="numeric-cell">' + data.toLocaleString() + '</span>';
+                                                    }
+                                                }
+                                                return data;
+                                            }
+                                        }
+                                    ]
+                                });
 
-                            // Show and populate main data table first
-                            $('#main-table').html(response.main_table);
-                            $('#main-results').fadeIn();
-                            initializeDataTable('main-table');
+                                // Show and populate campaign table
+                                $('#campaign-table').html(response.campaign_table);
+                                $('#campaign-results').fadeIn();
+                                initializeDataTable('campaign-table');
 
-                            // Show and populate campaign table
-                            $('#campaign-table').html(response.campaign_table);
-                            $('#campaign-results').fadeIn();
-                            initializeDataTable('campaign-table');
-
-                            // Show and populate content table
-                            $('#content-table').html(response.content_table);
-                            $('#content-results').fadeIn();
-                            initializeDataTable('content-table');
+                                // Show and populate content table
+                                $('#content-table').html(response.content_table);
+                                $('#content-results').fadeIn();
+                                initializeDataTable('content-table');
+                            });
                         });
                     } else {
                         $('#status').html(`<div class="alert alert-danger">Error: ${response.message}</div>`);

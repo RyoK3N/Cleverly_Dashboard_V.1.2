@@ -1,4 +1,3 @@
-# monday_extract_groups.py
 from __future__ import annotations
 import os
 import requests
@@ -14,7 +13,7 @@ import numpy as np
 
 from dataclasses import dataclass
 from datetime import date
-from typing import Callable, Final
+from typing import Callable, Final, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -791,8 +790,9 @@ def fetch_data():
 #             [np.inf, -np.inf], 0).fillna(0) * 100
 
 #         kpi["Close Rate(Show) %"] = (kpi["Close"] /
-#                                      kpi["Sales Call Taken"]).replace(
-#                                          [np.inf, -np.inf], 0).fillna(0) * 100
+#                               ```python
+                                      kpi["Sales Call Taken"]).replace(
+                                          [np.inf, -np.inf], 0).fillna(0) * 100
 
 #         kpi["Close Rate(MQL) %"] = (kpi["Close"] / kpi["Proposals"].replace(
 #             0, np.nan)).replace([np.inf, -np.inf], 0).fillna(0) * 100
@@ -868,7 +868,7 @@ def fetch_data():
 #                             end_date: str, filter_column: str) -> pd.DataFrame:
 #     """
 #     Build the KPI table for the date range [st_date, end_date] (inclusive).
-    
+
 #     Parameters
 #     ----------
 #     dataframes     output of fetch_data(); keys such as 'scheduled', 'won', …
@@ -1163,93 +1163,13 @@ def process_data_COLD_EMAIL(
     return kpi_final
 
 
-# def process_data_Google_Ads(dataframes: dict[str, pd.DataFrame], st_date: str,
-#                             end_date: str, filter_column: str):
-
-#     # ── unpack individual stages (empty DF if missing) ────────────────────
-#     op_cancelled = dataframes.get("cancelled", pd.DataFrame())
-#     op_lost = dataframes.get("lost", pd.DataFrame())
-#     op_noshow = dataframes.get("noshow", pd.DataFrame())
-#     op_proposal = dataframes.get("proposal", pd.DataFrame())
-#     op_scheduled = dataframes.get("scheduled", pd.DataFrame())
-#     op_unqualified = dataframes.get("unqualified", pd.DataFrame())
-#     op_won = dataframes.get("won", pd.DataFrame())
-
-#     # ── Combine all stages into one DataFrame ────────────────────────────
-#     all_stages = pd.concat([
-#         op_cancelled, op_lost, op_noshow, op_proposal, op_scheduled,
-#         op_unqualified, op_won
-#     ],
-#                            ignore_index=True)
-
-#     def _filter(df: pd.DataFrame, date_col: str) -> pd.DataFrame:
-#         if date_col not in df.columns:
-#             return pd.DataFrame(columns=df.columns)
-
-#         dates = pd.to_datetime(df[date_col].apply(extract_date),
-#                                errors="coerce").dt.date
-#         mask = ((dates >= pd.to_datetime(st_date).date()) &
-#                 (dates <= pd.to_datetime(end_date).date()))
-#         return df.loc[mask]
-
-#     fdate = _filter  # alias
-
-#     # ── Apply date filter if data exists ─────────────────────────────────
-#     if not all_stages.empty and filter_column in all_stages.columns:
-#         all_stages = fdate(all_stages, filter_column)
-
-#     # ── Group by UTM Campaign and count occurrences ─────────────────────
-#     if not all_stages.empty and 'UTM Campaign' in all_stages.columns:
-#         # Convert Deal Value to numeric before aggregation
-#         all_stages['Deal Value'] = pd.to_numeric(all_stages['Deal Value'],
-#                                                  errors='coerce').fillna(0)
-
-#         df_campaigns = all_stages.groupby('UTM Campaign').agg({
-#             'UTM Campaign':
-#             'count',
-#             'Deal Value':
-#             'sum'
-#         }).rename(columns={
-#             'UTM Campaign': 'Count',
-#             'Deal Value': 'Total Deal Value'
-#         })
-#         df_campaigns = df_campaigns.reset_index()
-#         df_campaigns['Total Deal Value'] = df_campaigns[
-#             'Total Deal Value'].fillna(0)
-#     else:
-#         df_campaigns = pd.DataFrame(
-#             columns=['UTM Campaign', 'Count', 'Total Deal Value'])
-
-#     # ── Group by UTM Content and count occurrences ──────────────────────
-#     if not all_stages.empty and 'UTM Content' in all_stages.columns:
-#         # Deal Value should already be converted above, but ensure it's numeric
-#         if 'Deal Value' not in all_stages.columns or all_stages[
-#                 'Deal Value'].dtype == 'object':
-#             all_stages['Deal Value'] = pd.to_numeric(all_stages['Deal Value'],
-#                                                      errors='coerce').fillna(0)
-
-#         df_content = all_stages.groupby('UTM Content').agg({
-#             'UTM Content': 'count',
-#             'Deal Value': 'sum'
-#         }).rename(columns={
-#             'UTM Content': 'Count',
-#             'Deal Value': 'Total Deal Value'
-#         })
-#         df_content = df_content.reset_index()
-#         df_content['Total Deal Value'] = df_content['Total Deal Value'].fillna(
-#             0)
-#     else:
-#         df_content = pd.DataFrame(
-#             columns=['UTM Content', 'Count', 'Total Deal Value'])
-
-#     return df_campaigns, df_content
-
 def process_data_Google_Ads(
     dataframes: dict[str, pd.DataFrame],
     st_date: str,
     end_date: str,
-    filter_column: str,
-) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    filter_column: str = 'Sales Call Date',
+    for_main_table: bool = False
+) -> Union[pd.DataFrame, Tuple[pd.DataFrame, pd.DataFrame]]:
     """
     Return two DataFrames aggregated by Google-Ads UTM parameters.
 
@@ -1262,6 +1182,10 @@ def process_data_Google_Ads(
     """
 
     start, end = map(lambda d: pd.to_datetime(d).date(), (st_date, end_date))
+
+    # If for_main_table is True, return owner-based KPI metrics like cold-email
+    if for_main_table:
+        return process_data(dataframes, st_date, end_date, filter_column)
 
     # combine all pipeline stages
     stage = lambda k: dataframes.get(k, pd.DataFrame())
@@ -1562,6 +1486,7 @@ def process_data_LINKEDIN(
         )
 
     kpi["New Calls Booked"] = _count(all_stages)
+```python
     kpi["Sales Call Taken"] = _count(
         pd.concat([op_unqualified, op_proposal, op_won, op_lost], copy=False)
     )
@@ -1615,4 +1540,3 @@ def process_data_LINKEDIN(
     )
 
     return kpi_final
-

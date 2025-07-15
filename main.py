@@ -1497,34 +1497,51 @@ def apply_filters_google_ads():
         )
         selected_owners = request.json.get('selected_owners', [])
 
-        # First, process the general filtered data to show before the specialized tables
-        processed_df = process_data_Google_Ads(data, st_date, end_date, filter_column)[0]  # Get the first table for display
+        # Process the filtered data (only google-ads UTM Source) for KPI table first
+        main_processed_df = process_data_Google_Ads(data, st_date, end_date, filter_column, for_main_table=True)
 
-        # Apply owner filtering if specified
         if selected_owners:
             # Filter data by selected owners (excluding any existing Total row)
-            filtered_df = processed_df[processed_df['UTM Campaign'].isin(selected_owners)]
-            processed_df = filtered_df
+            filtered_df = main_processed_df[main_processed_df['Owner'].isin(selected_owners)]
 
-        # Create the filtered data table to show before Table 1 and Table 2
-        processed_df.replace({
+            # Recalculate totals for filtered data
+            numeric_cols = filtered_df.select_dtypes(include=[np.number]).columns
+            totals_dict = {'Owner': 'Total'}
+
+            for col in numeric_cols:
+                if col != 'Owner':
+                    if '%' in col or 'Rate' in col:
+                        # For percentage columns, calculate mean
+                        totals_dict[col] = filtered_df[col].mean()
+                    else:
+                        # For other numeric columns, calculate sum
+                        totals_dict[col] = filtered_df[col].sum()
+
+            # Create totals row DataFrame
+            totals_row = pd.DataFrame([totals_dict])
+
+            # Combine filtered data with new totals row
+            main_processed_df = pd.concat([filtered_df, totals_row], ignore_index=True)
+
+        # Create the main KPI table
+        main_processed_df.replace({
             np.nan: None,
             np.inf: None,
             -np.inf: None
         }, inplace=True)
 
-        numeric_columns = processed_df.select_dtypes(include=[np.number]).columns
+        numeric_columns = main_processed_df.select_dtypes(include=[np.number]).columns
         for col in numeric_columns:
-            processed_df[col] = processed_df[col].astype(float)
+            main_processed_df[col] = main_processed_df[col].astype(float)
 
-        # Create HTML for the main filtered table
-        main_table_html = processed_df.to_html(
+        # Create HTML for the main KPI table
+        main_table_html = main_processed_df.to_html(
             classes='table table-striped table-bordered',
             index=False,
             border=0)
 
-        # Process the filtered data (only google-ads UTM Source) for specialized tables
-        campaign_df, content_df = process_data_Google_Ads(data, st_date, end_date, filter_column)
+        # Process the filtered data for specialized tables (UTM Campaign and UTM Content)
+        campaign_df, content_df = process_data_Google_Ads(data, st_date, end_date, filter_column, for_main_table=False)
 
         logger.info(
             f"Google-ads data processing complete. Campaign DataFrame has {len(campaign_df)} rows, Content DataFrame has {len(content_df)} rows"
