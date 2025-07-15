@@ -1495,8 +1495,35 @@ def apply_filters_google_ads():
         logger.info(
             f"Processing google-ads data with date range {st_date} to {end_date} on column {filter_column}"
         )
+        selected_owners = request.json.get('selected_owners', [])
 
-        # Process the filtered data (only google-ads UTM Source)
+        # First, process the general filtered data to show before the specialized tables
+        processed_df = process_data_Google_Ads(data, st_date, end_date, filter_column)[0]  # Get the first table for display
+
+        # Apply owner filtering if specified
+        if selected_owners:
+            # Filter data by selected owners (excluding any existing Total row)
+            filtered_df = processed_df[processed_df['UTM Campaign'].isin(selected_owners)]
+            processed_df = filtered_df
+
+        # Create the filtered data table to show before Table 1 and Table 2
+        processed_df.replace({
+            np.nan: None,
+            np.inf: None,
+            -np.inf: None
+        }, inplace=True)
+
+        numeric_columns = processed_df.select_dtypes(include=[np.number]).columns
+        for col in numeric_columns:
+            processed_df[col] = processed_df[col].astype(float)
+
+        # Create HTML for the main filtered table
+        main_table_html = processed_df.to_html(
+            classes='table table-striped table-bordered',
+            index=False,
+            border=0)
+
+        # Process the filtered data (only google-ads UTM Source) for specialized tables
         campaign_df, content_df = process_data_Google_Ads(data, st_date, end_date, filter_column)
 
         logger.info(
@@ -1538,6 +1565,7 @@ def apply_filters_google_ads():
 
         return jsonify({
             "status": "success", 
+            "main_table": main_table_html,
             "campaign_table": campaign_html,
             "content_table": content_html
         })

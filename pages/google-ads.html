@@ -168,6 +168,20 @@
                                     <button type="submit" class="btn btn-success btn-block">Analyze Google Ads</button>
                                 </div>
                             </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="owner_select">Select Owners (Optional):</label>
+                                    <select id="owner_select" name="owner_select" class="form-control" multiple>
+                                        <!-- Options will be populated via JavaScript -->
+                                    </select>
+                                    <small class="form-text text-muted">Hold Ctrl/Cmd to select multiple owners</small>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <div class="mt-4">
+                                        <button type="button" id="clear-owners" class="btn btn-outline-secondary">Clear Selection</button>
+                                    </div>
+                                </div>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -181,6 +195,20 @@
                     <div class="card-body">
                         <h3 class="card-title">Results</h3>
                         <div id="status"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Data Table (Filtered Google Ads Data) -->
+        <div class="row" id="main-results" style="display: none;">
+            <div class="col-12">
+                <div class="card mb-4">
+                    <div class="card-header" style="background: linear-gradient(135deg, #6c757d, #495057); color: white;">
+                        <h4 class="mb-0">Google Ads Data (Filtered by UTM Source = 'google-ads')</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive data-table" id="main-table"></div>
                     </div>
                 </div>
             </div>
@@ -325,12 +353,40 @@
         }
 
         $(document).ready(function() {
+            // Load owners on page load
+            loadOwners();
+
             // Form submit handler
             $('#filter-form').on('submit', function(e) {
                 e.preventDefault();
                 applyFilters();
             });
+
+            // Clear owners selection
+            $('#clear-owners').on('click', function() {
+                $('#owner_select').val([]);
+            });
         });
+
+        function loadOwners() {
+            $.ajax({
+                url: '/get_owners',
+                type: 'GET',
+                success: function(response) {
+                    const ownerSelect = $('#owner_select');
+                    ownerSelect.empty();
+                    
+                    if (response.owners && response.owners.length > 0) {
+                        response.owners.forEach(function(owner) {
+                            ownerSelect.append(`<option value="${owner}">${owner}</option>`);
+                        });
+                    }
+                },
+                error: function() {
+                    console.error('Failed to load owners');
+                }
+            });
+        }
 
         function applyFilters() {
             showLoading('Processing Google Ads data...');
@@ -338,11 +394,13 @@
             const startDate = $('#start_date').val();
             const endDate = $('#end_date').val();
             const filterColumn = $('#filter_column').val();
+            const selectedOwners = $('#owner_select').val() || [];
 
             const data = {
                 start_date: startDate,
                 end_date: endDate,
-                filter_column: filterColumn
+                filter_column: filterColumn,
+                selected_owners: selectedOwners
             };
 
             $.ajax({
@@ -358,6 +416,11 @@
                             statusDiv.html(`
                                 <div class="alert alert-success mb-3">Google Ads data processed successfully!</div>
                             `).fadeIn(400);
+
+                            // Show and populate main data table first
+                            $('#main-table').html(response.main_table);
+                            $('#main-results').fadeIn();
+                            initializeDataTable('main-table');
 
                             // Show and populate campaign table
                             $('#campaign-table').html(response.campaign_table);
