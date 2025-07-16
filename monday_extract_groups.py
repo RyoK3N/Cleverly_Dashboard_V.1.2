@@ -512,14 +512,32 @@ def process_data(dataframes: dict[str, pd.DataFrame], st_date: str,
 
     # ── convenience: date-range filter  ───────────────────────────────────
     def _filter(df: pd.DataFrame, date_col: str) -> pd.DataFrame:
-        if date_col not in df.columns:
-            return pd.DataFrame(columns=df.columns)
+        if date_col not in df.columns or df.empty:
+            return df.iloc[0:0]  # empty with same columns
 
-        dates = pd.to_datetime(df[date_col].apply(extract_date), format="mixed",
-                               errors="coerce").dt.date
-        mask = ((dates >= pd.to_datetime(st_date).date()) &
-                (dates <= pd.to_datetime(end_date).date()))
-        return df.loc[mask]
+        # Convert the entire column to datetime first, similar to your test
+        df_copy = df.copy()
+        try:
+            # Convert column to datetime
+            df_copy[date_col] = pd.to_datetime(df_copy[date_col], format='mixed', errors='coerce')
+
+            # Convert filter dates to datetime
+            start_datetime = pd.to_datetime(st_date)
+            end_datetime = pd.to_datetime(end_date)
+
+            # Apply filter
+            mask = ((df_copy[date_col] >= start_datetime) & 
+                   (df_copy[date_col] <= end_datetime))
+
+            return df.loc[mask]
+        except Exception as e:
+            logger.warning(f"Error filtering by {date_col}: {e}")
+            # Fallback to original method
+            dates = pd.to_datetime(df[date_col].apply(extract_date), format="mixed",
+                                   errors="coerce").dt.date
+            mask = ((dates >= pd.to_datetime(st_date).date()) &
+                    (dates <= pd.to_datetime(end_date).date()))
+            return df.loc[mask]
 
     fdate = _filter  # alias
 
@@ -706,14 +724,32 @@ def process_data_COLD_EMAIL(dataframes: dict[str, pd.DataFrame], st_date: str,
 
     # ── convenience: date-range filter  ───────────────────────────────────
     def _filter(df: pd.DataFrame, date_col: str) -> pd.DataFrame:
-        if date_col not in df.columns:
-            return pd.DataFrame(columns=df.columns)
+        if date_col not in df.columns or df.empty:
+            return df.iloc[0:0]  # empty with same columns
 
-        dates = pd.to_datetime(df[date_col].apply(extract_date), format = "mixed",
-                               errors="coerce").dt.date
-        mask = ((dates >= pd.to_datetime(st_date).date()) &
-                (dates <= pd.to_datetime(end_date).date()))
-        return df.loc[mask]
+        # Convert the entire column to datetime first, similar to your test
+        df_copy = df.copy()
+        try:
+            # Convert column to datetime
+            df_copy[date_col] = pd.to_datetime(df_copy[date_col], format='mixed', errors='coerce')
+
+            # Convert filter dates to datetime
+            start_datetime = pd.to_datetime(st_date)
+            end_datetime = pd.to_datetime(end_date)
+
+            # Apply filter
+            mask = ((df_copy[date_col] >= start_datetime) & 
+                   (df_copy[date_col] <= end_datetime))
+
+            return df.loc[mask]
+        except Exception as e:
+            logger.warning(f"Error filtering by {date_col}: {e}")
+            # Fallback to original method
+            dates = pd.to_datetime(df[date_col].apply(extract_date), format="mixed",
+                                   errors="coerce").dt.date
+            mask = ((dates >= pd.to_datetime(st_date).date()) &
+                    (dates <= pd.to_datetime(end_date).date()))
+            return df.loc[mask]
 
     fdate = _filter  # alias
 
@@ -773,7 +809,8 @@ def process_data_COLD_EMAIL(dataframes: dict[str, pd.DataFrame], st_date: str,
         kpi["Show Rate %"] = (kpi["Sales Call Taken"] / kpi["New Calls Booked"]
                               ).replace([np.inf, -np.inf], 0).fillna(0) * 100
 
-        kpi["Unqualified Rate %"] = (kpi["Unqualified"] /
+        kpi["Unqualified Rate %"] =```python
+ (kpi["Unqualified"] /
                                      kpi["New Calls Booked"]).replace(
                                          [np.inf, -np.inf], 0).fillna(0) * 100
 
@@ -900,14 +937,32 @@ def process_data_Google_Ads(dataframes: dict[str, pd.DataFrame], st_date: str,
 
     # ── convenience: date-range filter  ───────────────────────────────────
     def _filter(df: pd.DataFrame, date_col: str) -> pd.DataFrame:
-        if date_col not in df.columns:
-            return pd.DataFrame(columns=df.columns)
+        if date_col not in df.columns or df.empty:
+            return df.iloc[0:0]  # empty with same columns
 
-        dates = pd.to_datetime(df[date_col].apply(extract_date), format = "mixed",
-                               errors="coerce").dt.date
-        mask = ((dates >= pd.to_datetime(st_date).date()) &
-                (dates <= pd.to_datetime(end_date).date()))
-        return df.loc[mask]
+        # Convert the entire column to datetime first, similar to your test
+        df_copy = df.copy()
+        try:
+            # Convert column to datetime
+            df_copy[date_col] = pd.to_datetime(df_copy[date_col], format='mixed', errors='coerce')
+
+            # Convert filter dates to datetime
+            start_datetime = pd.to_datetime(st_date)
+            end_datetime = pd.to_datetime(end_date)
+
+            # Apply filter
+            mask = ((df_copy[date_col] >= start_datetime) & 
+                   (df_copy[date_col] <= end_datetime))
+
+            return df.loc[mask]
+        except Exception as e:
+            logger.warning(f"Error filtering by {date_col}: {e}")
+            # Fallback to original method
+            dates = pd.to_datetime(df[date_col].apply(extract_date), format="mixed",
+                                   errors="coerce").dt.date
+            mask = ((dates >= pd.to_datetime(st_date).date()) &
+                    (dates <= pd.to_datetime(end_date).date()))
+            return df.loc[mask]
 
     fdate = _filter  # alias
 
@@ -1094,14 +1149,32 @@ def process_data_LINKEDIN(dataframes: dict[str, pd.DataFrame], st_date: str,
 
     # ── convenience: date-range filter  ───────────────────────────────────
     def _filter(df: pd.DataFrame, date_col: str) -> pd.DataFrame:
-        if date_col not in df.columns:
-            return pd.DataFrame(columns=df.columns)
+        if date_col not in df.columns or df.empty:
+            return df.iloc[0:0]  # empty with same columns
 
-        dates = pd.to_datetime(df[date_col].apply(extract_date), format = "mixed",
-                               errors="coerce").dt.date
-        mask = ((dates >= pd.to_datetime(st_date).date()) &
-                (dates <= pd.to_datetime(end_date).date()))
-        return df.loc[mask]
+        # Convert the entire column to datetime first, similar to your test
+        df_copy = df.copy()
+        try:
+            # Convert column to datetime
+            df_copy[date_col] = pd.to_datetime(df_copy[date_col], format='mixed', errors='coerce')
+
+            # Convert filter dates to datetime
+            start_datetime = pd.to_datetime(st_date)
+            end_datetime = pd.to_datetime(end_date)
+
+            # Apply filter
+            mask = ((df_copy[date_col] >= start_datetime) & 
+                   (df_copy[date_col] <= end_datetime))
+
+            return df.loc[mask]
+        except Exception as e:
+            logger.warning(f"Error filtering by {date_col}: {e}")
+            # Fallback to original method
+            dates = pd.to_datetime(df[date_col].apply(extract_date), format="mixed",
+                                   errors="coerce").dt.date
+            mask = ((dates >= pd.to_datetime(st_date).date()) &
+                    (dates <= pd.to_datetime(end_date).date()))
+            return df.loc[mask]
 
     fdate = _filter  # alias
 

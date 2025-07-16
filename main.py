@@ -1530,12 +1530,31 @@ def apply_filters_google_ads():
         def _filter(df: pd.DataFrame, date_col: str) -> pd.DataFrame:
             if date_col not in df.columns or df.empty:
                 return df.iloc[0:0]  # empty with same columns
-            dates = pd.to_datetime(df[date_col].apply(extract_date),
-                                   format="mixed",
-                                   errors="coerce").dt.date
-            mask = ((dates >= pd.to_datetime(st_date).date()) &
-                    (dates <= pd.to_datetime(end_date).date()))
-            return df.loc[mask]
+            
+            # Convert the entire column to datetime first, similar to your test
+            df_copy = df.copy()
+            try:
+                # Convert column to datetime
+                df_copy[date_col] = pd.to_datetime(df_copy[date_col], format='mixed', errors='coerce')
+                
+                # Convert filter dates to datetime
+                start_datetime = pd.to_datetime(st_date)
+                end_datetime = pd.to_datetime(end_date)
+                
+                # Apply filter
+                mask = ((df_copy[date_col] >= start_datetime) & 
+                       (df_copy[date_col] <= end_datetime))
+                
+                return df.loc[mask]
+            except Exception as e:
+                logger.warning(f"Error filtering by {date_col}: {e}")
+                # Fallback to original method
+                dates = pd.to_datetime(df[date_col].apply(extract_date),
+                                       format="mixed",
+                                       errors="coerce").dt.date
+                mask = ((dates >= pd.to_datetime(st_date).date()) &
+                        (dates <= pd.to_datetime(end_date).date()))
+                return df.loc[mask]
 
         if not combined_df.empty:
             combined_df = _filter(combined_df, filter_column)
