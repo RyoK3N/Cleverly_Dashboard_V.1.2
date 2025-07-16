@@ -809,8 +809,7 @@ def process_data_COLD_EMAIL(dataframes: dict[str, pd.DataFrame], st_date: str,
         kpi["Show Rate %"] = (kpi["Sales Call Taken"] / kpi["New Calls Booked"]
                               ).replace([np.inf, -np.inf], 0).fillna(0) * 100
 
-        kpi["Unqualified Rate %"] =```python
- (kpi["Unqualified"] /
+        kpi["Unqualified Rate %"] = (kpi["Unqualified"] /
                                      kpi["New Calls Booked"]).replace(
                                          [np.inf, -np.inf], 0).fillna(0) * 100
 
