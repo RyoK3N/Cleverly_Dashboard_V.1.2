@@ -1531,30 +1531,26 @@ def apply_filters_google_ads():
             if date_col not in df.columns or df.empty:
                 return df.iloc[0:0]  # empty with same columns
             
-            # Convert the entire column to datetime first, similar to your test
             df_copy = df.copy()
             try:
-                # Convert column to datetime
+                # Convert column to datetime with mixed format handling
                 df_copy[date_col] = pd.to_datetime(df_copy[date_col], format='mixed', errors='coerce')
                 
-                # Convert filter dates to datetime
-                start_datetime = pd.to_datetime(st_date)
-                end_datetime = pd.to_datetime(end_date)
+                # Convert filter dates to datetime (ensure YYYY-MM-DD format)
+                start_datetime = pd.to_datetime(st_date, format='%Y-%m-%d')
+                end_datetime = pd.to_datetime(end_date, format='%Y-%m-%d')
                 
-                # Apply filter
+                # Apply filter - use original df indices but filter based on df_copy dates
                 mask = ((df_copy[date_col] >= start_datetime) & 
                        (df_copy[date_col] <= end_datetime))
                 
                 return df.loc[mask]
             except Exception as e:
                 logger.warning(f"Error filtering by {date_col}: {e}")
-                # Fallback to original method
-                dates = pd.to_datetime(df[date_col].apply(extract_date),
-                                       format="mixed",
-                                       errors="coerce").dt.date
-                mask = ((dates >= pd.to_datetime(st_date).date()) &
-                        (dates <= pd.to_datetime(end_date).date()))
-                return df.loc[mask]
+                logger.debug(f"Date column sample values: {df[date_col].head().tolist()}")
+                logger.debug(f"Start date: {st_date}, End date: {end_date}")
+                # Return empty DataFrame on error rather than trying fallback
+                return df.iloc[0:0]
 
         if not combined_df.empty:
             combined_df = _filter(combined_df, filter_column)
