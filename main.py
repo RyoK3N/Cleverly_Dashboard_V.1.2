@@ -59,7 +59,7 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 from monday_extract_groups import fetch_data, extract_date
 import json
 import os
-from monday_extract_groups import process_data , process_data_COLD_EMAIL , process_data_Google_Ads , process_data_LINKEDIN
+from monday_extract_groups import process_data , process_data_COLD_EMAIL , process_data_Google_Ads , process_data_LINKEDIN, process_data_GOOGLE_ADS_KPI
 import requests
 import numpy as np
 import pandas as pd
@@ -1540,12 +1540,52 @@ def apply_filters_google_ads():
             index=False,
             border=0)
 
+        # Process the filtered data using KPI processing function (similar to cold-email)
+        processed_df = process_data_GOOGLE_ADS_KPI(data, st_date, end_date, filter_column)
+
+        if selected_owners:
+            # Filter data by selected owners (excluding any existing Total row)
+            filtered_df = processed_df[processed_df['Owner'].isin(selected_owners)]
+
+            # Recalculate totals for filtered data
+            numeric_cols = filtered_df.select_dtypes(include=[np.number]).columns
+            totals_dict = {'Owner': 'Total'}
+
+            for col in numeric_cols:
+                if col != 'Owner':
+                    if '%' in col or 'Rate' in col:
+                        # For percentage columns, calculate mean
+                        totals_dict[col] = filtered_df[col].mean()
+                    else:
+                        # For other numeric columns, calculate sum
+                        totals_dict[col] = filtered_df[col].sum()
+
+            # Create totals row DataFrame
+            totals_row = pd.DataFrame([totals_dict])
+
+            # Combine filtered data with new totals row
+            processed_df = pd.concat([filtered_df, totals_row], ignore_index=True)
+
+        # Handle NaN values in KPI table
+        processed_df.replace({
+            np.nan: None,
+            np.inf: None,
+            -np.inf: None
+        }, inplace=True)
+
+        # Convert numeric columns to float
+        numeric_columns = processed_df.select_dtypes(include=[np.number]).columns
+        for col in numeric_columns:
+            processed_df[col] = processed_df[col].astype(float)
+
+        # Create HTML for the KPI table
+        main_table_html = processed_df.to_html(
+            classes='table table-striped table-bordered',
+            index=False,
+            border=0)
+
         # Process the filtered data for specialized tables (UTM Campaign and Content)
         campaign_df, content_df = process_data_Google_Ads(data, st_date, end_date, filter_column)
-
-        logger.info(
-            f"Google-ads data processing complete. Main table has {len(combined_df)} rows, Campaign DataFrame has {len(campaign_df)} rows, Content DataFrame has {len(content_df)} rows"
-        )
 
         # Handle NaN values in specialized tables
         campaign_df.replace({
@@ -1579,6 +1619,10 @@ def apply_filters_google_ads():
             classes='table table-striped table-bordered',
             index=False,
             border=0)
+
+        logger.info(
+            f"Google-ads data processing complete. KPI table has {len(processed_df)} rows, Campaign DataFrame has {len(campaign_df)} rows, Content DataFrame has {len(content_df)} rows"
+        )
 
         return jsonify({
             "status": "success", 

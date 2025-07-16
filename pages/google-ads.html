@@ -88,6 +88,22 @@
             text-align: right;
             font-family: 'Courier New', monospace;
         }
+        .percentage-cell {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+        }
+        .owner-cell {
+            font-weight: 600;
+            color: #495057;
+        }
+        .table tbody tr:last-child {
+            background-color: #e3f2fd !important;
+            font-weight: bold;
+            border-top: 2px solid #007bff;
+        }
+        .table tbody tr:last-child:hover {
+            background-color: #bbdefb !important;
+        }
         .campaign-header {
             background: linear-gradient(135deg, #28a745, #20c997);
             color: white;
@@ -193,15 +209,68 @@
             </div>
         </div>
 
-        <!-- Main Data Table (Filtered Google Ads Data) -->
+        <!-- Main KPI Table (Google Ads KPIs) -->
         <div class="row" id="main-results" style="display: none;">
             <div class="col-12">
                 <div class="card mb-4">
                     <div class="card-header" style="background: linear-gradient(135deg, #6c757d, #495057); color: white;">
-                        <h4 class="mb-0">Google Ads Data (Filtered by UTM Source = 'google-ads')</h4>
+                        <h4 class="mb-0">Google Ads KPI Metrics (UTM Source = 'google-ads')</h4>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive data-table" id="main-table"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="row" id="charts-container" style="display: none;">
+            <div class="col-12">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3 class="card-title">Google Ads Performance Charts</h3>
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">New Calls Booked by Owner</h5>
+                                        <canvas id="newCallsChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Sales Calls Taken by Owner</h5>
+                                        <canvas id="salesCallsChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Revenue per Call by Owner</h5>
+                                        <canvas id="revenuePerCallChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Closed Revenue by Owner</h5>
+                                        <canvas id="closedRevenueChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Close Rate by Owner</h5>
+                                        <canvas id="closeRateChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -266,6 +335,114 @@
 
         function hideLoading() {
             $('#loading-overlay').fadeOut();
+        }
+
+        function initializeKpiDataTable(tableId) {
+            // Destroy existing DataTable if it exists
+            if ($.fn.DataTable.isDataTable(`#${tableId} table`)) {
+                $(`#${tableId} table`).DataTable().destroy();
+            }
+
+            // Initialize KPI DataTable with enhanced styling
+            const table = $(`#${tableId} table`).DataTable({
+                scrollX: true,
+                scrollY: '60vh',
+                scrollCollapse: true,
+                paging: true,
+                pageLength: 25,
+                lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+                fixedHeader: true,
+                fixedColumns: {
+                    leftColumns: 1
+                },
+                dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+                     '<"row"<"col-sm-12"B>>' +
+                     '<"row"<"col-sm-12"tr>>' +
+                     '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+                buttons: [
+                    {
+                        extend: 'copy',
+                        className: 'btn btn-sm btn-outline-primary'
+                    },
+                    {
+                        extend: 'csv',
+                        className: 'btn btn-sm btn-outline-success'
+                    },
+                    {
+                        extend: 'excel',
+                        className: 'btn btn-sm btn-outline-success'
+                    },
+                    {
+                        extend: 'pdf',
+                        className: 'btn btn-sm btn-outline-danger'
+                    },
+                    {
+                        extend: 'print',
+                        className: 'btn btn-sm btn-outline-info'
+                    }
+                ],
+                order: [],
+                language: {
+                    search: "",
+                    searchPlaceholder: "Search owners, metrics...",
+                    lengthMenu: "Show _MENU_ entries per page",
+                    info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                    paginate: {
+                        first: "First",
+                        last: "Last",
+                        next: "Next",
+                        previous: "Previous"
+                    }
+                },
+                columnDefs: [
+                    {
+                        targets: 0,
+                        className: 'owner-cell'
+                    },
+                    {
+                        targets: '_all',
+                        render: function(data, type, row, meta) {
+                            if (type === 'display' && typeof data === 'number') {
+                                // Check if it's a percentage
+                                if (meta.settings.aoColumns[meta.col].sTitle.includes('%')) {
+                                    return '<span class="percentage-cell">' + data.toFixed(1) + '%</span>';
+                                }
+                                // Check if it's a dollar amount
+                                else if (meta.settings.aoColumns[meta.col].sTitle.includes('$')) {
+                                    return '<span class="numeric-cell">$' + data.toLocaleString() + '</span>';
+                                }
+                                // Regular number
+                                else {
+                                    return '<span class="numeric-cell">' + data.toLocaleString() + '</span>';
+                                }
+                            }
+                            return data;
+                        }
+                    }
+                ],
+                initComplete: function() {
+                    // Add custom styling to the Total row
+                    $(`#${tableId} table tbody tr:last-child`).addClass('table-warning');
+                    
+                    // Add search to individual columns
+                    this.api().columns().every(function() {
+                        var column = this;
+                        var title = $(column.header()).text();
+                        
+                        if (title !== '') {
+                            $(column.header()).append('<br><input type="text" placeholder="Filter ' + title + '" style="width:100%;font-size:10px;margin-top:5px;" />');
+                            
+                            $('input', column.header()).on('keyup change clear', function() {
+                                if (column.search() !== this.value) {
+                                    column.search(this.value).draw();
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
+            return table;
         }
 
         function initializeDataTable(tableId, data) {
@@ -413,15 +590,81 @@
                             $('#content-table table').DataTable().destroy();
                         }
 
+                        // Clear existing charts
+                        document.querySelectorAll('canvas').forEach(canvas => {
+                            if (canvas.chart) {
+                                canvas.chart.destroy();
+                            }
+                        });
+
                         statusDiv.fadeOut(400, function() {
+                            let mainTableHtml = response.main_table;
+
+                            // Parse table data for charts
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(mainTableHtml, 'text/html');
+                            const table = doc.querySelector('table');
+                            const headers = Array.from(table.querySelectorAll('th')).map(th => th.textContent.trim());
+                            const rows = Array.from(table.querySelectorAll('tbody tr')).map(tr => 
+                                Array.from(tr.querySelectorAll('td')).map(td => td.textContent.trim())
+                            );
+
+                            // Filter out the "Total" row for charts
+                            const data = rows.filter(row => row[0] !== 'Total');
+
+                            // Extract data for charts
+                            const owners = data.map(row => row[headers.indexOf('Owner')]);
+                            const newCalls = data.map(row => parseFloat(row[headers.indexOf('New Calls Booked')]));
+                            const salesCalls = data.map(row => parseFloat(row[headers.indexOf('Sales Call Taken')]));
+                            const revenuePerCall = data.map(row => parseFloat(row[headers.indexOf('Revenue Per Call $')]));
+                            const closedRevenue = data.map(row => parseFloat(row[headers.indexOf('Closed Revenue $')]));
+
+                            // Show charts container
+                            $('#charts-container').fadeIn();
+
+                            // Function to create/update chart
+                            function createOrUpdateChart(canvasId, label, data, color) {
+                                const canvas = document.getElementById(canvasId);
+                                if (canvas.chart) {
+                                    canvas.chart.destroy();
+                                }
+                                canvas.chart = new Chart(canvas, {
+                                    type: 'bar',
+                                    data: {
+                                        labels: owners,
+                                        datasets: [{
+                                            label: label,
+                                            data: data,
+                                            backgroundColor: color
+                                        }]
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        scales: {
+                                            y: {
+                                                beginAtZero: true
+                                            }
+                                        }
+                                    }
+                                });
+                                return canvas.chart;
+                            }
+
+                            // Create/update all charts
+                            createOrUpdateChart('newCallsChart', 'New Calls Booked', newCalls, 'rgba(75, 192, 192, 0.6)');
+                            createOrUpdateChart('salesCallsChart', 'Sales Calls Taken', salesCalls, 'rgba(153, 102, 255, 0.6)');
+                            createOrUpdateChart('revenuePerCallChart', 'Revenue per Call ($)', revenuePerCall, 'rgba(255, 159, 64, 0.6)');
+                            createOrUpdateChart('closedRevenueChart', 'Closed Revenue ($)', closedRevenue, 'rgba(255, 99, 132, 0.6)');
+                            createOrUpdateChart('closeRateChart', 'Close Rate (%)', data.map(row => parseFloat(row[headers.indexOf('Close Rate %')])), 'rgba(54, 162, 235, 0.6)');
+
                             statusDiv.html(`
-                                <div class="alert alert-success mb-3">Google Ads data processed successfully!</div>
+                                <div class="alert alert-success mb-3">Google Ads KPI data processed successfully!</div>
                             `).fadeIn(400);
 
-                            // Show and populate main data table first
-                            $('#main-table').html(response.main_table);
+                            // Show and populate main KPI table
+                            $('#main-table').html(mainTableHtml);
                             $('#main-results').fadeIn();
-                            initializeDataTable('main-table');
+                            initializeKpiDataTable('main-table');
 
                             // Show and populate campaign table
                             $('#campaign-table').html(response.campaign_table);

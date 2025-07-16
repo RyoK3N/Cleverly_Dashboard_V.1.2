@@ -1616,3 +1616,108 @@ def process_data_LINKEDIN(
 
     return kpi_final
 
+
+def process_data_GOOGLE_ADS_KPI(
+    dataframes: dict[str, pd.DataFrame],
+    st_date: str,
+    end_date: str,
+    filter_column: str,
+) -> pd.DataFrame:
+    """
+    Build KPI table for GOOGLE ADS leads (UTM Source = 'google-ads') in the range [st_date, end_date] (inclusive).
+
+    Parameters
+    ----------
+    dataframes     Output of `fetch_data()`; keys like 'scheduled', 'won', …
+    st_date        ISO date *YYYY-MM-DD* – range start
+    end_date       ISO date *YYYY-MM-DD* – range end
+    filter_column  Column chosen in the UI for date filtering
+                   (e.g. 'Date Created', 'Sales Call Date')
+    """
+    start, end = map(lambda d: pd.to_datetime(d).date(), (st_date, end_date))
+
+    # Stage dataframes
+    stage = lambda k: dataframes.get(k, pd.DataFrame()).copy()
+    op_cancelled, op_lost, op_noshow = map(stage, ("cancelled", "lost", "noshow"))
+    op_proposal, op_scheduled = map(stage, ("proposal", "scheduled"))
+    op_unqualified, op_won = map(stage, ("unqualified", "won"))
+
+    all_stages = pd.concat(
+        [
+            op_cancelled,
+            op_lost,
+            op_noshow,
+            op_proposal,
+            op_scheduled,
+            op_unqualified,
+            op_won,
+        ],
+        copy=False,
+    )
+
+    owners = all_stages["Owner"].dropna().unique()
+    kpi = pd.DataFrame(index=pd.Index(owners, name="Owner")).assign(Owner=owners)
+
+    def _count(df: pd.DataFrame, date_col: str = filter_column) -> pd.Series:
+        return (
+            _filter_by_date(df, date_col, start, end)
+            .groupby("Owner")
+            .size()
+            .reindex(kpi.index, fill_value=0)
+        )
+
+    kpi["New Calls Booked"] = _count(all_stages)
+    kpi["Sales Call Taken"] = _count(
+        pd.concat([op_unqualified, op_proposal, op_won, op_lost], copy=False)
+    )
+    kpi["Unqualified"] = _count(op_unqualified)
+    kpi["Cancelled Calls"] = _count(op_cancelled)
+
+    prop_date_col = (
+        "Sales Call Date" if "Sales Call Date" in op_proposal.columns else filter_column
+    )
+    kpi["Proposals"] = _count(
+        pd.concat([op_proposal, op_won, op_lost], copy=False), prop_date_col
+    )
+
+    # Origin: Google Ads only
+    kpi["Google Ads"] = _count(all_stages[all_stages["UTM Source"] == "google-ads"])
+
+    # Close count
+    kpi["Close"] = (
+        _filter_by_date(op_won, prop_date_col, start, end)
+        .groupby("Owner")
+        .size()
+        .reindex(kpi.index, fill_value=0)
+    )
+
+    # Revenue: Closed + Pipeline
+    def _sum_deal_value(df: pd.DataFrame) -> pd.Series:
+        if df.empty:
+            return pd.Series(0, index=kpi.index)
+        df = df.copy()
+        df["Deal Value"] = pd.to_numeric(df["Deal Value"], errors="coerce").fillna(0)
+        return (
+            _filter_by_date(df, filter_column, start, end)
+            .groupby("Owner")["Deal Value"]
+            .sum()
+            .reindex(kpi.index, fill_value=0)
+        )
+
+    kpi["Closed Revenue $"] = _sum_deal_value(op_won)
+    kpi["Pipeline Revenue $"] = _sum_deal_value(op_proposal)
+
+    # Derived Metrics (same as process_data)
+    for metric in DERIVED_METRICS:
+        kpi[metric.name] = metric.producer(kpi)
+
+    # Total row
+    total_row = _build_total_row(kpi)
+    kpi_final = (
+        pd.concat([kpi, pd.DataFrame([total_row], index=["Total"])]).
+        drop(columns=["Close"], errors="ignore").
+        reset_index(drop=True)
+    )
+
+    return kpi_final
+
