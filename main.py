@@ -56,7 +56,7 @@ with app.app_context():
 
 # Configure OpenAI
 openai.api_key = os.getenv("OPENAI_API_KEY")
-from monday_extract_groups import fetch_data
+from monday_extract_groups import fetch_data, extract_date
 import json
 import os
 from monday_extract_groups import process_data , process_data_COLD_EMAIL , process_data_Google_Ads , process_data_LINKEDIN
