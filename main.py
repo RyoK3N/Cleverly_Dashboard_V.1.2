@@ -1497,40 +1497,57 @@ def apply_filters_google_ads():
         )
         selected_owners = request.json.get('selected_owners', [])
 
-        # First, process the general filtered data to show before the specialized tables
-        processed_df = process_data_Google_Ads(data, st_date, end_date, filter_column)[0]  # Get the first table for display
+        # Create the main filtered table (like cold-email page)
+        # Combine all stages into one DataFrame for display
+        all_stages = []
+        for group_name, df in data.items():
+            if not df.empty:
+                df_copy = df.copy()
+                df_copy['Group'] = group_name
+                all_stages.append(df_copy)
+        
+        if all_stages:
+            combined_df = pd.concat(all_stages, ignore_index=True)
+        else:
+            combined_df = pd.DataFrame()
+
+        # Apply date filtering to combined data
+        def _filter(df: pd.DataFrame, date_col: str) -> pd.DataFrame:
+            if date_col not in df.columns or df.empty:
+                return df.iloc[0:0]  # empty with same columns
+            dates = pd.to_datetime(df[date_col].apply(extract_date), errors="coerce").dt.date
+            mask = ((dates >= pd.to_datetime(st_date).date()) & 
+                   (dates <= pd.to_datetime(end_date).date()))
+            return df.loc[mask]
+
+        if not combined_df.empty:
+            combined_df = _filter(combined_df, filter_column)
 
         # Apply owner filtering if specified
-        if selected_owners:
-            # Filter data by selected owners (excluding any existing Total row)
-            filtered_df = processed_df[processed_df['UTM Campaign'].isin(selected_owners)]
-            processed_df = filtered_df
+        if selected_owners and not combined_df.empty and 'Owner' in combined_df.columns:
+            combined_df = combined_df[combined_df['Owner'].isin(selected_owners)]
 
-        # Create the filtered data table to show before Table 1 and Table 2
-        processed_df.replace({
+        # Clean the main data for display
+        combined_df.replace({
             np.nan: None,
             np.inf: None,
             -np.inf: None
         }, inplace=True)
 
-        numeric_columns = processed_df.select_dtypes(include=[np.number]).columns
-        for col in numeric_columns:
-            processed_df[col] = processed_df[col].astype(float)
-
         # Create HTML for the main filtered table
-        main_table_html = processed_df.to_html(
+        main_table_html = combined_df.to_html(
             classes='table table-striped table-bordered',
             index=False,
             border=0)
 
-        # Process the filtered data (only google-ads UTM Source) for specialized tables
+        # Process the filtered data for specialized tables (UTM Campaign and Content)
         campaign_df, content_df = process_data_Google_Ads(data, st_date, end_date, filter_column)
 
         logger.info(
-            f"Google-ads data processing complete. Campaign DataFrame has {len(campaign_df)} rows, Content DataFrame has {len(content_df)} rows"
+            f"Google-ads data processing complete. Main table has {len(combined_df)} rows, Campaign DataFrame has {len(campaign_df)} rows, Content DataFrame has {len(content_df)} rows"
         )
 
-        # Handle NaN values
+        # Handle NaN values in specialized tables
         campaign_df.replace({
             np.nan: None,
             np.inf: None,
@@ -1552,7 +1569,7 @@ def apply_filters_google_ads():
         for col in numeric_columns:
             content_df[col] = content_df[col].astype(float)
 
-        # Create HTML tables
+        # Create HTML tables for specialized tables
         campaign_html = campaign_df.to_html(
             classes='table table-striped table-bordered',
             index=False,

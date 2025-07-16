@@ -346,38 +346,33 @@
         }
 
         $(document).ready(function() {
-            // Load owners on page load
-            loadOwners();
+            // Populate owners dropdown when page loads
+            populateOwners();
+            
+            // Handle owner filter apply button
+            $('#apply-owners-filter').click(function() {
+                applyFilters();
+            });
 
             // Form submit handler
             $('#filter-form').on('submit', function(e) {
                 e.preventDefault();
                 applyFilters();
             });
-
-            // Clear owners selection
-            $('#clear-owners').on('click', function() {
-                $('#owner_select').val([]);
-            });
         });
 
-        function loadOwners() {
-            $.ajax({
-                url: '/get_owners',
-                type: 'GET',
-                success: function(response) {
-                    const ownerSelect = $('#owner_select');
-                    ownerSelect.empty();
-                    
-                    if (response.owners && response.owners.length > 0) {
-                        response.owners.forEach(function(owner) {
-                            ownerSelect.append(`<option value="${owner}">${owner}</option>`);
-                        });
-                    }
-                },
-                error: function() {
-                    console.error('Failed to load owners');
-                }
+        function populateOwners() {
+            $.get('/get_owners', function(data) {
+                const container = $('#owners-checkbox-container');
+                container.empty();
+                data.owners.forEach(owner => {
+                    container.append(`
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input owner-checkbox" id="owner-${owner}" value="${owner}">
+                            <label class="custom-control-label" for="owner-${owner}">${owner}</label>
+                        </div>
+                    `);
+                });
             });
         }
 
@@ -387,7 +382,9 @@
             const startDate = $('#start_date').val();
             const endDate = $('#end_date').val();
             const filterColumn = $('#filter_column').val();
-            const selectedOwners = $('#owner_select').val() || [];
+            const selectedOwners = $('.owner-checkbox:checked').map(function() {
+                return $(this).val();
+            }).get();
 
             const data = {
                 start_date: startDate,
@@ -404,6 +401,17 @@
                 success: function(response) {
                     if (response.status === 'success') {
                         const statusDiv = $('#status');
+
+                        // Destroy existing DataTables if they exist
+                        if ($.fn.DataTable.isDataTable('#main-table table')) {
+                            $('#main-table table').DataTable().destroy();
+                        }
+                        if ($.fn.DataTable.isDataTable('#campaign-table table')) {
+                            $('#campaign-table table').DataTable().destroy();
+                        }
+                        if ($.fn.DataTable.isDataTable('#content-table table')) {
+                            $('#content-table table').DataTable().destroy();
+                        }
 
                         statusDiv.fadeOut(400, function() {
                             statusDiv.html(`
