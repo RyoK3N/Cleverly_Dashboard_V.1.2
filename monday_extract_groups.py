@@ -517,8 +517,20 @@ def process_data(dataframes: dict[str, pd.DataFrame], st_date: str,
 
         df_copy = df.copy()
         try:
-            # Convert column to datetime with mixed format handling
-            df_copy[date_col] = pd.to_datetime(df_copy[date_col], format='mixed', errors='coerce')
+            # First, try to extract dates using the extract_date function for consistency
+            if date_col == 'Sales Call Date':
+                # For Sales Call Date, extract the date part using regex
+                df_copy[date_col] = df_copy[date_col].apply(extract_date)
+
+            # Convert column to datetime, handling various formats
+            df_copy[date_col] = pd.to_datetime(df_copy[date_col], errors='coerce')
+
+            # Remove rows where date conversion failed
+            df_copy = df_copy.dropna(subset=[date_col])
+
+            if df_copy.empty:
+                logger.warning(f"No valid dates found in {date_col} column")
+                return df.iloc[0:0]
 
             # Convert filter dates to datetime (ensure YYYY-MM-DD format)
             start_datetime = pd.to_datetime(st_date, format='%Y-%m-%d')
@@ -528,12 +540,18 @@ def process_data(dataframes: dict[str, pd.DataFrame], st_date: str,
             mask = ((df_copy[date_col] >= start_datetime) & 
                    (df_copy[date_col] <= end_datetime))
 
-            return df.loc[mask]
+            valid_indices = df_copy[mask].index
+            return df.loc[valid_indices]
+
         except Exception as e:
             logger.warning(f"Error filtering by {date_col}: {e}")
             logger.debug(f"Date column sample values: {df[date_col].head().tolist()}")
             logger.debug(f"Start date: {st_date}, End date: {end_date}")
-            # Return empty DataFrame on error rather than trying fallback
+            # Try fallback with Date Created if Sales Call Date fails
+            if date_col == 'Sales Call Date' and 'Date Created' in df.columns:
+                logger.info("Falling back to Date Created column")
+                return _filter(df, 'Date Created')
+            # Return empty DataFrame on error
             return df.iloc[0:0]
 
     fdate = _filter  # alias
@@ -726,8 +744,20 @@ def process_data_COLD_EMAIL(dataframes: dict[str, pd.DataFrame], st_date: str,
 
         df_copy = df.copy()
         try:
-            # Convert column to datetime with mixed format handling
-            df_copy[date_col] = pd.to_datetime(df_copy[date_col], format='mixed', errors='coerce')
+            # First, try to extract dates using the extract_date function for consistency
+            if date_col == 'Sales Call Date':
+                # For Sales Call Date, extract the date part using regex
+                df_copy[date_col] = df_copy[date_col].apply(extract_date)
+
+            # Convert column to datetime, handling various formats
+            df_copy[date_col] = pd.to_datetime(df_copy[date_col], errors='coerce')
+
+            # Remove rows where date conversion failed
+            df_copy = df_copy.dropna(subset=[date_col])
+
+            if df_copy.empty:
+                logger.warning(f"No valid dates found in {date_col} column")
+                return df.iloc[0:0]
 
             # Convert filter dates to datetime (ensure YYYY-MM-DD format)
             start_datetime = pd.to_datetime(st_date, format='%Y-%m-%d')
@@ -737,12 +767,18 @@ def process_data_COLD_EMAIL(dataframes: dict[str, pd.DataFrame], st_date: str,
             mask = ((df_copy[date_col] >= start_datetime) & 
                    (df_copy[date_col] <= end_datetime))
 
-            return df.loc[mask]
+            valid_indices = df_copy[mask].index
+            return df.loc[valid_indices]
+
         except Exception as e:
             logger.warning(f"Error filtering by {date_col}: {e}")
             logger.debug(f"Date column sample values: {df[date_col].head().tolist()}")
             logger.debug(f"Start date: {st_date}, End date: {end_date}")
-            # Return empty DataFrame on error rather than trying fallback
+            # Try fallback with Date Created if Sales Call Date fails
+            if date_col == 'Sales Call Date' and 'Date Created' in df.columns:
+                logger.info("Falling back to Date Created column")
+                return _filter(df, 'Date Created')
+            # Return empty DataFrame on error
             return df.iloc[0:0]
 
     fdate = _filter  # alias
@@ -775,7 +811,7 @@ def process_data_COLD_EMAIL(dataframes: dict[str, pd.DataFrame], st_date: str,
                                                        fill_value=0))
 
     # Proposals count = Proposal + Won + Lost (anchor to Sales Call date if present)
-    prop_date_col = ("Sales Call Date" if "Sales Call Date"
+prop_date_col = ("Sales Call Date" if "Sales Call Date"
                      in op_proposal.columns else filter_column)
     kpi["Proposals"] = (pd.concat([op_proposal, op_won, op_lost]).pipe(
         lambda df: fdate(df, prop_date_col)).groupby("Owner").size().reindex(
@@ -935,8 +971,20 @@ def process_data_Google_Ads(dataframes: dict[str, pd.DataFrame], st_date: str,
 
         df_copy = df.copy()
         try:
-            # Convert column to datetime with mixed format handling
-            df_copy[date_col] = pd.to_datetime(df_copy[date_col], format='mixed', errors='coerce')
+            # First, try to extract dates using the extract_date function for consistency
+            if date_col == 'Sales Call Date':
+                # For Sales Call Date, extract the date part using regex
+                df_copy[date_col] = df_copy[date_col].apply(extract_date)
+
+            # Convert column to datetime, handling various formats
+            df_copy[date_col] = pd.to_datetime(df_copy[date_col], errors='coerce')
+
+            # Remove rows where date conversion failed
+            df_copy = df_copy.dropna(subset=[date_col])
+
+            if df_copy.empty:
+                logger.warning(f"No valid dates found in {date_col} column")
+                return df.iloc[0:0]
 
             # Convert filter dates to datetime (ensure YYYY-MM-DD format)
             start_datetime = pd.to_datetime(st_date, format='%Y-%m-%d')
@@ -946,12 +994,18 @@ def process_data_Google_Ads(dataframes: dict[str, pd.DataFrame], st_date: str,
             mask = ((df_copy[date_col] >= start_datetime) & 
                    (df_copy[date_col] <= end_datetime))
 
-            return df.loc[mask]
+            valid_indices = df_copy[mask].index
+            return df.loc[valid_indices]
+
         except Exception as e:
             logger.warning(f"Error filtering by {date_col}: {e}")
             logger.debug(f"Date column sample values: {df[date_col].head().tolist()}")
             logger.debug(f"Start date: {st_date}, End date: {end_date}")
-            # Return empty DataFrame on error rather than trying fallback
+            # Try fallback with Date Created if Sales Call Date fails
+            if date_col == 'Sales Call Date' and 'Date Created' in df.columns:
+                logger.info("Falling back to Date Created column")
+                return _filter(df, 'Date Created')
+            # Return empty DataFrame on error
             return df.iloc[0:0]
 
     fdate = _filter  # alias
@@ -1144,8 +1198,20 @@ def process_data_LINKEDIN(dataframes: dict[str, pd.DataFrame], st_date: str,
 
         df_copy = df.copy()
         try:
-            # Convert column to datetime with mixed format handling
-            df_copy[date_col] = pd.to_datetime(df_copy[date_col], format='mixed', errors='coerce')
+            # First, try to extract dates using the extract_date function for consistency
+            if date_col == 'Sales Call Date':
+                # For Sales Call Date, extract the date part using regex
+                df_copy[date_col] = df_copy[date_col].apply(extract_date)
+
+            # Convert column to datetime, handling various formats
+            df_copy[date_col] = pd.to_datetime(df_copy[date_col], errors='coerce')
+
+            # Remove rows where date conversion failed
+            df_copy = df_copy.dropna(subset=[date_col])
+
+            if df_copy.empty:
+                logger.warning(f"No valid dates found in {date_col} column")
+                return df.iloc[0:0]
 
             # Convert filter dates to datetime (ensure YYYY-MM-DD format)
             start_datetime = pd.to_datetime(st_date, format='%Y-%m-%d')
@@ -1155,12 +1221,18 @@ def process_data_LINKEDIN(dataframes: dict[str, pd.DataFrame], st_date: str,
             mask = ((df_copy[date_col] >= start_datetime) & 
                    (df_copy[date_col] <= end_datetime))
 
-            return df.loc[mask]
+            valid_indices = df_copy[mask].index
+            return df.loc[valid_indices]
+
         except Exception as e:
             logger.warning(f"Error filtering by {date_col}: {e}")
             logger.debug(f"Date column sample values: {df[date_col].head().tolist()}")
             logger.debug(f"Start date: {st_date}, End date: {end_date}")
-            # Return empty DataFrame on error rather than trying fallback
+            # Try fallback with Date Created if Sales Call Date fails
+            if date_col == 'Sales Call Date' and 'Date Created' in df.columns:
+                logger.info("Falling back to Date Created column")
+                return _filter(df, 'Date Created')
+            # Return empty DataFrame on error
             return df.iloc[0:0]
 
     fdate = _filter  # alias
