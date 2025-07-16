@@ -59,7 +59,7 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 from monday_extract_groups import fetch_data, extract_date
 import json
 import os
-from monday_extract_groups import process_data , process_data_COLD_EMAIL , process_data_Google_Ads , process_data_LINKEDIN, process_data_GOOGLE_ADS_KPI
+from monday_extract_groups_old import process_data, process_data_COLD_EMAIL, process_data_GOOGLE_ADS_KPI, process_data_Google_Ads, process_data_LINKEDIN
 import requests
 import numpy as np
 import pandas as pd
@@ -477,10 +477,12 @@ def apply_filters_route():
 
         if selected_owners:
             # Filter data by selected owners (excluding any existing Total row)
-            filtered_df = processed_df[processed_df['Owner'].isin(selected_owners)]
+            filtered_df = processed_df[processed_df['Owner'].isin(
+                selected_owners)]
 
             # Recalculate totals for filtered data
-            numeric_cols = filtered_df.select_dtypes(include=[np.number]).columns
+            numeric_cols = filtered_df.select_dtypes(
+                include=[np.number]).columns
             totals_dict = {'Owner': 'Total'}
 
             for col in numeric_cols:
@@ -496,7 +498,8 @@ def apply_filters_route():
             totals_row = pd.DataFrame([totals_dict])
 
             # Combine filtered data with new totals row
-            processed_df = pd.concat([filtered_df, totals_row], ignore_index=True)
+            processed_df = pd.concat([filtered_df, totals_row],
+                                     ignore_index=True)
 
         logger.info(
             f"Data processing complete. Processed DataFrame has {len(processed_df)} rows"
@@ -1342,6 +1345,7 @@ def chatbot_ai():
 
     return render_template('chatbot.html')
 
+
 @app.route('/apply_filters_cold_email', methods=['POST'])
 def apply_filters_cold_email():
     try:
@@ -1374,11 +1378,15 @@ def apply_filters_cold_email():
                 # Filter only cold-email origin data
                 if 'origin' in df.columns:
                     df_filtered = df[df['origin'] == 'cold-email']
-                    logger.info(f"Group {key}: {len(df)} total rows, {len(df_filtered)} cold-email rows")
+                    logger.info(
+                        f"Group {key}: {len(df)} total rows, {len(df_filtered)} cold-email rows"
+                    )
                 else:
                     # If no origin column, assume no cold-email data
                     df_filtered = pd.DataFrame(columns=df.columns)
-                    logger.info(f"Group {key}: No origin column found, using empty DataFrame")
+                    logger.info(
+                        f"Group {key}: No origin column found, using empty DataFrame"
+                    )
 
                 data[key] = df_filtered
 
@@ -1393,14 +1401,17 @@ def apply_filters_cold_email():
         selected_owners = request.json.get('selected_owners', [])
 
         # Process the filtered data (only cold-email origin)
-        processed_df = process_data_COLD_EMAIL(data, st_date, end_date, filter_column)
+        processed_df = process_data_COLD_EMAIL(data, st_date, end_date,
+                                               filter_column)
 
         if selected_owners:
             # Filter data by selected owners (excluding any existing Total row)
-            filtered_df = processed_df[processed_df['Owner'].isin(selected_owners)]
+            filtered_df = processed_df[processed_df['Owner'].isin(
+                selected_owners)]
 
             # Recalculate totals for filtered data
-            numeric_cols = filtered_df.select_dtypes(include=[np.number]).columns
+            numeric_cols = filtered_df.select_dtypes(
+                include=[np.number]).columns
             totals_dict = {'Owner': 'Total'}
 
             for col in numeric_cols:
@@ -1416,7 +1427,8 @@ def apply_filters_cold_email():
             totals_row = pd.DataFrame([totals_dict])
 
             # Combine filtered data with new totals row
-            processed_df = pd.concat([filtered_df, totals_row], ignore_index=True)
+            processed_df = pd.concat([filtered_df, totals_row],
+                                     ignore_index=True)
 
         logger.info(
             f"Cold-email data processing complete. Processed DataFrame has {len(processed_df)} rows"
@@ -1444,7 +1456,6 @@ def apply_filters_cold_email():
         logger.error("Error in apply_filters_cold_email: %s", e)
         logger.debug("Traceback:\n%s", traceback.format_exc())
         return jsonify({"status": "error", "message": str(e)})
-
 
 
 @app.route('/apply_filters_google_ads', methods=['POST'])
@@ -1479,11 +1490,15 @@ def apply_filters_google_ads():
                 # Filter only google-ads UTM Source data
                 if 'UTM Source' in df.columns:
                     df_filtered = df[df['UTM Source'] == 'google-ads']
-                    logger.info(f"Group {key}: {len(df)} total rows, {len(df_filtered)} google-ads rows")
+                    logger.info(
+                        f"Group {key}: {len(df)} total rows, {len(df_filtered)} google-ads rows"
+                    )
                 else:
                     # If no UTM Source column, assume no google-ads data
                     df_filtered = pd.DataFrame(columns=df.columns)
-                    logger.info(f"Group {key}: No UTM Source column found, using empty DataFrame")
+                    logger.info(
+                        f"Group {key}: No UTM Source column found, using empty DataFrame"
+                    )
 
                 data[key] = df_filtered
 
@@ -1505,7 +1520,7 @@ def apply_filters_google_ads():
                 df_copy = df.copy()
                 df_copy['Group'] = group_name
                 all_stages.append(df_copy)
-        
+
         if all_stages:
             combined_df = pd.concat(all_stages, ignore_index=True)
         else:
@@ -1515,9 +1530,11 @@ def apply_filters_google_ads():
         def _filter(df: pd.DataFrame, date_col: str) -> pd.DataFrame:
             if date_col not in df.columns or df.empty:
                 return df.iloc[0:0]  # empty with same columns
-            dates = pd.to_datetime(df[date_col].apply(extract_date), errors="coerce").dt.date
-            mask = ((dates >= pd.to_datetime(st_date).date()) & 
-                   (dates <= pd.to_datetime(end_date).date()))
+            dates = pd.to_datetime(df[date_col].apply(extract_date),
+                                   format="mixed",
+                                   errors="coerce").dt.date
+            mask = ((dates >= pd.to_datetime(st_date).date()) &
+                    (dates <= pd.to_datetime(end_date).date()))
             return df.loc[mask]
 
         if not combined_df.empty:
@@ -1525,14 +1542,16 @@ def apply_filters_google_ads():
 
         # Apply owner filtering if specified
         if selected_owners and not combined_df.empty and 'Owner' in combined_df.columns:
-            combined_df = combined_df[combined_df['Owner'].isin(selected_owners)]
+            combined_df = combined_df[combined_df['Owner'].isin(
+                selected_owners)]
 
         # Clean the main data for display
         combined_df.replace({
             np.nan: None,
             np.inf: None,
             -np.inf: None
-        }, inplace=True)
+        },
+                            inplace=True)
 
         # Create HTML for the main filtered table
         main_table_html = combined_df.to_html(
@@ -1541,14 +1560,17 @@ def apply_filters_google_ads():
             border=0)
 
         # Process the filtered data using KPI processing function (similar to cold-email)
-        processed_df = process_data_GOOGLE_ADS_KPI(data, st_date, end_date, filter_column)
+        processed_df = process_data_GOOGLE_ADS_KPI(data, st_date, end_date,
+                                                   filter_column)
 
         if selected_owners:
             # Filter data by selected owners (excluding any existing Total row)
-            filtered_df = processed_df[processed_df['Owner'].isin(selected_owners)]
+            filtered_df = processed_df[processed_df['Owner'].isin(
+                selected_owners)]
 
             # Recalculate totals for filtered data
-            numeric_cols = filtered_df.select_dtypes(include=[np.number]).columns
+            numeric_cols = filtered_df.select_dtypes(
+                include=[np.number]).columns
             totals_dict = {'Owner': 'Total'}
 
             for col in numeric_cols:
@@ -1564,17 +1586,20 @@ def apply_filters_google_ads():
             totals_row = pd.DataFrame([totals_dict])
 
             # Combine filtered data with new totals row
-            processed_df = pd.concat([filtered_df, totals_row], ignore_index=True)
+            processed_df = pd.concat([filtered_df, totals_row],
+                                     ignore_index=True)
 
         # Handle NaN values in KPI table
         processed_df.replace({
             np.nan: None,
             np.inf: None,
             -np.inf: None
-        }, inplace=True)
+        },
+                             inplace=True)
 
         # Convert numeric columns to float
-        numeric_columns = processed_df.select_dtypes(include=[np.number]).columns
+        numeric_columns = processed_df.select_dtypes(
+            include=[np.number]).columns
         for col in numeric_columns:
             processed_df[col] = processed_df[col].astype(float)
 
@@ -1585,23 +1610,27 @@ def apply_filters_google_ads():
             border=0)
 
         # Process the filtered data for specialized tables (UTM Campaign and Content)
-        campaign_df, content_df = process_data_Google_Ads(data, st_date, end_date, filter_column)
+        campaign_df, content_df = process_data_Google_Ads(
+            data, st_date, end_date, filter_column)
 
         # Handle NaN values in specialized tables
         campaign_df.replace({
             np.nan: None,
             np.inf: None,
             -np.inf: None
-        }, inplace=True)
+        },
+                            inplace=True)
 
         content_df.replace({
             np.nan: None,
             np.inf: None,
             -np.inf: None
-        }, inplace=True)
+        },
+                           inplace=True)
 
         # Convert numeric columns to float
-        numeric_columns = campaign_df.select_dtypes(include=[np.number]).columns
+        numeric_columns = campaign_df.select_dtypes(
+            include=[np.number]).columns
         for col in numeric_columns:
             campaign_df[col] = campaign_df[col].astype(float)
 
@@ -1625,7 +1654,7 @@ def apply_filters_google_ads():
         )
 
         return jsonify({
-            "status": "success", 
+            "status": "success",
             "main_table": main_table_html,
             "campaign_table": campaign_html,
             "content_table": content_html
@@ -1635,8 +1664,6 @@ def apply_filters_google_ads():
         logger.error("Error in apply_filters_google_ads: %s", e)
         logger.debug("Traceback:\n%s", traceback.format_exc())
         return jsonify({"status": "error", "message": str(e)})
-
-
 
     #     if selected_owners:
     #         # Filter data by selected owners (excluding any existing Total row)
@@ -1681,7 +1708,7 @@ def apply_filters_google_ads():
     #         classes='table table-striped table-bordered',
     #         index=False,
     #         border=0)
-    #     return jsonify({"status": "success", "table": table_html}) , 
+    #     return jsonify({"status": "success", "table": table_html}) ,
 
     # except Exception as e:
     #     logger.error("Error in apply_filters_cold_email: %s", e)
@@ -1690,7 +1717,6 @@ def apply_filters_google_ads():
 
 
 # --------------------------------------------------------------------------- #
-
 
 
 @app.route('/apply_filters_LinkedIn', methods=['POST'])
@@ -1725,11 +1751,15 @@ def apply_filters_LinkedIn():
                 # Filter only LinkedIn origin data
                 if 'origin' in df.columns:
                     df_filtered = df[df['origin'] == 'LinkedIn']
-                    logger.info(f"Group {key}: {len(df)} total rows, {len(df_filtered)} cold-email rows")
+                    logger.info(
+                        f"Group {key}: {len(df)} total rows, {len(df_filtered)} cold-email rows"
+                    )
                 else:
                     # If no origin column, assume no LinkedIn data
                     df_filtered = pd.DataFrame(columns=df.columns)
-                    logger.info(f"Group {key}: No origin column found, using empty DataFrame")
+                    logger.info(
+                        f"Group {key}: No origin column found, using empty DataFrame"
+                    )
 
                 data[key] = df_filtered
 
@@ -1744,14 +1774,17 @@ def apply_filters_LinkedIn():
         selected_owners = request.json.get('selected_owners', [])
 
         # Process the filtered data (only cold-email origin)
-        processed_df = process_data_LINKEDIN(data, st_date, end_date, filter_column)
+        processed_df = process_data_LINKEDIN(data, st_date, end_date,
+                                             filter_column)
 
         if selected_owners:
             # Filter data by selected owners (excluding any existing Total row)
-            filtered_df = processed_df[processed_df['Owner'].isin(selected_owners)]
+            filtered_df = processed_df[processed_df['Owner'].isin(
+                selected_owners)]
 
             # Recalculate totals for filtered data
-            numeric_cols = filtered_df.select_dtypes(include=[np.number]).columns
+            numeric_cols = filtered_df.select_dtypes(
+                include=[np.number]).columns
             totals_dict = {'Owner': 'Total'}
 
             for col in numeric_cols:
@@ -1767,7 +1800,8 @@ def apply_filters_LinkedIn():
             totals_row = pd.DataFrame([totals_dict])
 
             # Combine filtered data with new totals row
-            processed_df = pd.concat([filtered_df, totals_row], ignore_index=True)
+            processed_df = pd.concat([filtered_df, totals_row],
+                                     ignore_index=True)
 
         logger.info(
             f"LinkedIn data processing complete. Processed DataFrame has {len(processed_df)} rows"
@@ -1795,6 +1829,7 @@ def apply_filters_LinkedIn():
         logger.error(f"Error in apply_filters_LinkedIn: %s", e)
         logger.debug("Traceback:\n%s", traceback.format_exc())
         return jsonify({"status": "error", "message": str(e)})
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
