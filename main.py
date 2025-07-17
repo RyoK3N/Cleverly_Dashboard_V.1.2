@@ -59,7 +59,7 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 from monday_extract_groups import fetch_data, extract_date
 import json
 import os
-from monday_extract_groups import process_data , process_data_COLD_EMAIL , process_data_Google_Ads , process_data_LINKEDIN, process_data_GOOGLE_ADS_KPI
+from monday_extract_groups import process_data , process_data_COLD_EMAIL , process_data_Google_Ads , process_data_LINKEDIN, process_data_GOOGLE_ADS_KPI, process_data_GOOGLE_ADS_KPI_BY_CAMPAIGN, process_data_GOOGLE_ADS_KPI_BY_CONTENT
 import requests
 import numpy as np
 import pandas as pd
@@ -1584,51 +1584,52 @@ def apply_filters_google_ads():
             index=False,
             border=0)
 
-        # Process the filtered data for specialized tables (UTM Campaign and Content)
-        campaign_df, content_df = process_data_Google_Ads(data, st_date, end_date, filter_column)
+        # Process the filtered data for NEW KPI tables grouped by UTM Campaign and UTM Content
+        campaign_kpi_df = process_data_GOOGLE_ADS_KPI_BY_CAMPAIGN(data, st_date, end_date, filter_column)
+        content_kpi_df = process_data_GOOGLE_ADS_KPI_BY_CONTENT(data, st_date, end_date, filter_column)
 
-        # Handle NaN values in specialized tables
-        campaign_df.replace({
+        # Handle NaN values in new KPI tables
+        campaign_kpi_df.replace({
             np.nan: None,
             np.inf: None,
             -np.inf: None
         }, inplace=True)
 
-        content_df.replace({
+        content_kpi_df.replace({
             np.nan: None,
             np.inf: None,
             -np.inf: None
         }, inplace=True)
 
         # Convert numeric columns to float
-        numeric_columns = campaign_df.select_dtypes(include=[np.number]).columns
+        numeric_columns = campaign_kpi_df.select_dtypes(include=[np.number]).columns
         for col in numeric_columns:
-            campaign_df[col] = campaign_df[col].astype(float)
+            campaign_kpi_df[col] = campaign_kpi_df[col].astype(float)
 
-        numeric_columns = content_df.select_dtypes(include=[np.number]).columns
+        numeric_columns = content_kpi_df.select_dtypes(include=[np.number]).columns
         for col in numeric_columns:
-            content_df[col] = content_df[col].astype(float)
+            content_kpi_df[col] = content_kpi_df[col].astype(float)
 
-        # Create HTML tables for specialized tables
-        campaign_html = campaign_df.to_html(
+        # Create HTML tables for new KPI tables
+        campaign_kpi_html = campaign_kpi_df.to_html(
             classes='table table-striped table-bordered',
             index=False,
             border=0)
 
-        content_html = content_df.to_html(
+        content_kpi_html = content_kpi_df.to_html(
             classes='table table-striped table-bordered',
             index=False,
             border=0)
 
         logger.info(
-            f"Google-ads data processing complete. KPI table has {len(processed_df)} rows, Campaign DataFrame has {len(campaign_df)} rows, Content DataFrame has {len(content_df)} rows"
+            f"Google-ads data processing complete. KPI table has {len(processed_df)} rows, Campaign KPI DataFrame has {len(campaign_kpi_df)} rows, Content KPI DataFrame has {len(content_kpi_df)} rows"
         )
 
         return jsonify({
             "status": "success", 
             "main_table": main_table_html,
-            "campaign_table": campaign_html,
-            "content_table": content_html
+            "campaign_kpi_table": campaign_kpi_html,
+            "content_kpi_table": content_kpi_html
         })
 
     except Exception as e:

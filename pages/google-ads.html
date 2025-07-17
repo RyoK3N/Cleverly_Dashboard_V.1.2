@@ -276,29 +276,29 @@
             </div>
         </div>
 
-        <!-- Campaign Analysis Table -->
-        <div class="row" id="campaign-results" style="display: none;">
+        <!-- KPI Table by UTM Campaign -->
+        <div class="row" id="campaign-kpi-results" style="display: none;">
             <div class="col-12">
                 <div class="card mb-4">
-                    <div class="card-header campaign-header">
-                        <h4 class="mb-0">Table 1: Filtering by UTM Campaign</h4>
+                    <div class="card-header" style="background: linear-gradient(135deg, #fd7e14, #e55100); color: white;">
+                        <h4 class="mb-0">KPI Dashboard by UTM Campaign</h4>
                     </div>
                     <div class="card-body">
-                        <div class="table-responsive data-table" id="campaign-table"></div>
+                        <div class="table-responsive data-table" id="campaign-kpi-table"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Content Analysis Table -->
-        <div class="row" id="content-results" style="display: none;">
+        <!-- KPI Table by UTM Content -->
+        <div class="row" id="content-kpi-results" style="display: none;">
             <div class="col-12">
                 <div class="card mb-4">
-                    <div class="card-header content-header">
-                        <h4 class="mb-0">Table 2: Filtering by UTM Content</h4>
+                    <div class="card-header" style="background: linear-gradient(135deg, #6f42c1, #563d7c); color: white;">
+                        <h4 class="mb-0">KPI Dashboard by UTM Content</h4>
                     </div>
                     <div class="card-body">
-                        <div class="table-responsive data-table" id="content-table"></div>
+                        <div class="table-responsive data-table" id="content-kpi-table"></div>
                     </div>
                 </div>
             </div>
@@ -583,11 +583,11 @@
                         if ($.fn.DataTable.isDataTable('#main-table table')) {
                             $('#main-table table').DataTable().destroy();
                         }
-                        if ($.fn.DataTable.isDataTable('#campaign-table table')) {
-                            $('#campaign-table table').DataTable().destroy();
+                        if ($.fn.DataTable.isDataTable('#campaign-kpi-table table')) {
+                            $('#campaign-kpi-table table').DataTable().destroy();
                         }
-                        if ($.fn.DataTable.isDataTable('#content-table table')) {
-                            $('#content-table table').DataTable().destroy();
+                        if ($.fn.DataTable.isDataTable('#content-kpi-table table')) {
+                            $('#content-kpi-table table').DataTable().destroy();
                         }
 
                         // Clear existing charts
@@ -666,15 +666,15 @@
                             $('#main-results').fadeIn();
                             initializeKpiDataTable('main-table');
 
-                            // Show and populate campaign table
-                            $('#campaign-table').html(response.campaign_table);
-                            $('#campaign-results').fadeIn();
-                            initializeDataTable('campaign-table');
+                            // Show and populate campaign KPI table
+                            $('#campaign-kpi-table').html(response.campaign_kpi_table);
+                            $('#campaign-kpi-results').fadeIn();
+                            initializeKpiDataTable('campaign-kpi-table');
 
-                            // Show and populate content table
-                            $('#content-table').html(response.content_table);
-                            $('#content-results').fadeIn();
-                            initializeDataTable('content-table');
+                            // Show and populate content KPI table
+                            $('#content-kpi-table').html(response.content_kpi_table);
+                            $('#content-kpi-results').fadeIn();
+                            initializeKpiDataTable('content-kpi-table');
                         });
                     } else {
                         $('#status').html(`<div class="alert alert-danger">Error: ${response.message}</div>`);
