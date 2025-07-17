@@ -951,8 +951,8 @@
 
                             setTimeout(() => {
                                 createAnimatedChart('newCallsChart', 'bar', {
-                                    labels: owners,
-                                    datasets: [{
+                                        labels: owners,
+                                        datasets: [{
                                         label: 'New Calls Booked',
                                         data: newCalls
                                     }]
@@ -1102,14 +1102,14 @@
                                     ],
                                     initComplete: function() {
                                         $('#data-table table tbody tr:last-child, #data-table table tfoot tr').addClass('table-primary');
-
+                                        
                                         this.api().columns().every(function() {
                                             var column = this;
                                             var title = $(column.header()).text();
-
+                                            
                                             if (title !== '') {
                                                 $(column.header()).append('<br><input type="text" placeholder="Filter ' + title + '" style="width:100%;font-size:10px;margin-top:5px;border-radius:4px;border:1px solid #ddd;padding:2px;" />');
-
+                                                
                                                 $('input', column.header()).on('keyup change clear', function() {
                                                     if (column.search() !== this.value) {
                                                         column.search(this.value).draw();
@@ -1161,7 +1161,7 @@
                     if (data.status === 'success') {
                         statusDiv.html(`<div class="alert alert-success"><i class="fas fa-check-circle me-2"></i>${data.message}</div>`);
                         console.log('Calendly fetch output:', data.output);
-                    } else {
+                } else {
                         statusDiv.html(`<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Error: ${data.message}</div>`);
                     }
                 })

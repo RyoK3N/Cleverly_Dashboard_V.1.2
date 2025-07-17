@@ -1,12 +1,624 @@
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Lead Predictions - Cleverly Sales Dashboard</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cleverly Sales Dashboard - AI Predictions</title>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-        body { background-color: #f8f9fa; }
-        .navbar-brand { font-weight: bold; }
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            --light-bg: #f8fafc;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --card-hover-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            --border-radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --prediction-won: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            --prediction-lost: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            --confidence-high: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            --confidence-medium: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+            --confidence-low: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--light-bg);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            z-index: -2;
+            opacity: 0.1;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .navbar {
+            background: var(--primary-gradient) !important;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+            transition: var(--transition);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            border-radius: 8px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            transition: var(--transition);
+        }
+
+        .nav-link:hover::before,
+        .nav-link.active::before {
+            left: 0;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: white !important;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .card {
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            transition: var(--transition);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--primary-gradient);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        .card-title {
+            font-weight: 600;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-title i {
+            font-size: 1.2rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .btn {
+            border-radius: 12px;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: var(--transition);
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+        }
+
+        .btn-success {
+            background: var(--success-gradient);
+            border: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .stats-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(10px);
+            transition: var(--transition);
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .stats-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+        }
+
+        .stats-card.total::before {
+            background: var(--primary-gradient);
+        }
+
+        .stats-card.won::before {
+            background: var(--prediction-won);
+        }
+
+        .stats-card.lost::before {
+            background: var(--prediction-lost);
+        }
+
+        .stats-card.confidence::before {
+            background: var(--warning-gradient);
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .stats-number.total {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stats-number.won {
+            background: var(--prediction-won);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stats-number.lost {
+            background: var(--prediction-lost);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stats-number.confidence {
+            background: var(--warning-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stats-icon {
+            font-size: 2rem;
+            opacity: 0.8;
+        }
+
+        .confidence-bar {
+            height: 24px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.1);
+            margin: 0.25rem 0;
+            min-width: 100px;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .confidence-fill {
+            height: 100%;
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .confidence-fill::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .confidence-fill.high { 
+            background: var(--confidence-high);
+        }
+
+        .confidence-fill.medium { 
+            background: var(--confidence-medium);
+        }
+
+        .confidence-fill.low { 
+            background: var(--confidence-low);
+        }
+
+        .confidence-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+            font-weight: 700;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            color: white;
+            z-index: 1;
+        }
+
+        .prediction-cell {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 700;
+            text-align: center;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            min-width: 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prediction-cell::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: var(--transition);
+        }
+
+        .prediction-cell:hover::before {
+            left: 100%;
+        }
+
+        .prediction-won {
+            background: var(--prediction-won);
+        }
+
+        .prediction-lost {
+            background: var(--prediction-lost);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 350px;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            margin: 1rem 0;
+        }
+
+        .chart-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            overflow: hidden;
+        }
+
+        .chart-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        .chart-header {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 1rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .table-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+            margin: 1.5rem 0;
+        }
+
+        .table-controls {
+            padding: 1.5rem;
+            background: rgba(248, 249, 250, 0.8);
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .search-box {
+            flex: 1;
+            max-width: 300px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 3rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 25px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: var(--transition);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .search-box .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 1rem;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .export-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: var(--success-gradient);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .table-wrapper {
+            max-height: 60vh;
+            overflow: auto;
+            position: relative;
+        }
+
+        .table-wrapper::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .table-wrapper::-webkit-scrollbar-thumb {
+            background: rgba(102, 126, 234, 0.3);
+            border-radius: 4px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-thumb:hover {
+            background: rgba(102, 126, 234, 0.5);
+        }
+
+        .d3-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 0;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .d3-table th {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 1rem 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 12px;
+            border: none;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            cursor: pointer;
+            user-select: none;
+            transition: var(--transition);
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .d3-table th:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        }
+
+        .d3-table th.sorted-asc:after {
+            content: " ↑";
+            float: right;
+            font-weight: 700;
+        }
+
+        .d3-table th.sorted-desc:after {
+            content: " ↓";
+            float: right;
+            font-weight: 700;
+        }
+
+        .d3-table td {
+            padding: 1rem 0.75rem;
+            border-bottom: 1px solid #e2e8f0;
+            transition: var(--transition);
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+
+        .d3-table tbody tr {
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .d3-table tbody tr:hover {
+            background: linear-gradient(135deg, #f7fafc, #edf2f7);
+            transform: scale(1.01);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .d3-table tbody tr:nth-child(even) {
+            background-color: #fafbfc;
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .pagination-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid #e2e8f0;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: var(--primary-gradient);
+            color: white;
+            border-color: transparent;
+            transform: translateY(-2px);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-btn.active {
+            background: var(--primary-gradient);
+            color: white;
+            border-color: transparent;
+        }
+
+        .pagination-info {
+            margin: 0 1rem;
+            color: #6b7280;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
         .loading-overlay {
             display: none;
             position: fixed;
@@ -14,300 +626,178 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 9999;
         }
+
         .loading-spinner {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            color: white;
             text-align: center;
-        }
-        .prediction-won {
-            background-color: #d4edda !important;
-            color: #155724;
-        }
-        .prediction-lost {
-            background-color: #f8d7da !important;
-            color: #721c24;
-        }
-        .confidence-high {
-            font-weight: bold;
-            color: #28a745;
-        }
-        .confidence-medium {
-            font-weight: bold;
-            color: #ffc107;
-        }
-        .confidence-low {
-            font-weight: bold;
-            color: #dc3545;
-        }
-        .confidence-bar {
-            height: 20px;
-            border-radius: 10px;
-            overflow: hidden;
-            background-color: #e9ecef;
-            margin: 2px 0;
-            min-width: 80px;
-            position: relative;
-        }
-        .confidence-fill {
-            height: 100%;
-            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-            border-radius: 10px;
-        }
-        .confidence-fill.high { background: linear-gradient(45deg, #28a745, #34ce57); }
-        .confidence-fill.medium { background: linear-gradient(45deg, #ffc107, #ffcd39); }
-        .confidence-fill.low { background: linear-gradient(45deg, #dc3545, #e4606d); }
-        .confidence-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 12px;
-            font-weight: bold;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
             color: white;
         }
-        .stats-card {
-            border-left: 4px solid #007bff;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+        .spinner-ring {
+            width: 60px;
+            height: 60px;
+            border: 6px solid rgba(255, 255, 255, 0.3);
+            border-top: 6px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
         }
-        .stats-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
-        .stats-card.won {
-            border-left-color: #28a745;
-        }
-        .stats-card.lost {
-            border-left-color: #dc3545;
-        }
-        .table-container {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            overflow: hidden;
-            margin: 20px 0;
-        }
+
         .fade-in {
-            animation: fadeIn 0.6s ease-in;
+            animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        .slide-up {
-            animation: slideUp 0.5s ease-out;
+
+        .slide-in-left {
+            animation: slideInLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
-        
-        /* D3.js Table Styles */
-        .d3-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            margin: 0;
-            font-size: 14px;
+
+        .slide-in-right {
+            animation: slideInRight 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .d3-table th {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px 12px;
-            text-align: left;
-            font-weight: 600;
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .alert {
+            border-radius: 12px;
             border: none;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            cursor: pointer;
-            user-select: none;
-            transition: background-color 0.3s ease;
+            padding: 1rem 1.5rem;
+            font-weight: 500;
+            box-shadow: var(--card-shadow);
         }
-        .d3-table th:hover {
-            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-        }
-        .d3-table th.sorted-asc:after {
-            content: " ↑";
-            float: right;
-        }
-        .d3-table th.sorted-desc:after {
-            content: " ↓";
-            float: right;
-        }
-        .d3-table td {
-            padding: 12px;
-            border-bottom: 1px solid #e9ecef;
-            transition: all 0.3s ease;
-            max-width: 200px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .d3-table tbody tr {
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        .d3-table tbody tr:hover {
-            background-color: #f8f9fa;
-            transform: scale(1.02);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .d3-table tbody tr:hover td:first-child {
-            background-color: #f8f9fa;
-        }
-        .d3-table tbody tr:nth-child(even) {
-            background-color: #fafbfc;
-        }
-        .table-controls {
-            padding: 20px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .search-box {
-            flex: 1;
-            max-width: 300px;
-            position: relative;
-        }
-        .search-box input {
-            width: 100%;
-            padding: 8px 12px 8px 35px;
-            border: 1px solid #ced4da;
-            border-radius: 25px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-        .search-box input:focus {
-            outline: none;
-            border-color: #007bff;
-            box-shadow: 0 0 0 3px rgba(0,123,255,0.25);
-        }
-        .search-box .search-icon {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6c757d;
-        }
-        .pagination-info {
-            margin: 0 15px;
-            color: #6c757d;
-            font-size: 14px;
-        }
-        .pagination-controls {
-            display: flex;
-            gap: 5px;
-            align-items: center;
-        }
-        .pagination-btn {
-            padding: 6px 12px;
-            border: 1px solid #dee2e6;
-            background: white;
-            color: #007bff;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 14px;
-        }
-        .pagination-btn:hover:not(:disabled) {
-            background: #007bff;
+
+        .alert-success {
+            background: linear-gradient(135deg, #48bb78, #38a169);
             color: white;
         }
-        .pagination-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        .pagination-btn.active {
-            background: #007bff;
+
+        .alert-danger {
+            background: linear-gradient(135deg, #f56565, #e53e3e);
             color: white;
         }
-        .export-buttons {
-            display: flex;
-            gap: 5px;
-        }
-        .export-btn {
-            padding: 6px 12px;
-            border: 1px solid #007bff;
-            background: #007bff;
+
+        .alert-info {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
             color: white;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 12px;
         }
-        .export-btn:hover {
-            background: #0056b3;
-            transform: translateY(-1px);
+
+        .alert-warning {
+            background: linear-gradient(135deg, #ed8936, #dd6b20);
+            color: white;
         }
-        .table-wrapper {
-            max-height: 60vh;
-            overflow-y: auto;
-            overflow-x: auto;
-            position: relative;
-        }
-        .prediction-cell {
-            font-weight: bold;
-            padding: 8px 12px;
-            border-radius: 15px;
-            text-align: center;
-            min-width: 80px;
-        }
-        .row-enter {
-            opacity: 0;
-            transform: translateX(-20px);
-        }
-        .row-enter-active {
-            opacity: 1;
-            transform: translateX(0);
-            transition: all 0.5s ease;
+
+        @media (max-width: 768px) {
+            .table-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-box {
+                max-width: 100%;
+            }
+            
+            .export-buttons {
+                justify-content: center;
+            }
+            
+            .pagination-controls {
+                justify-content: center;
+            }
+            
+            .stats-number {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container-lg">
-            <a class="navbar-brand" href="#">Cleverly Sales Dashboard</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse"
-                    data-target="#navbarSupportedContent"
-                    aria-controls="navbarSupportedContent"
-                    aria-expanded="false"
-                    aria-label="Toggle navigation">
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-chart-line me-2"></i>
+                Cleverly Sales Dashboard
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav ml-auto">
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/dashboard">Dashboard</a>
+                        <a class="nav-link" href="/dashboard">
+                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/chatbot">Chatbot</a>
-                    </li>
-                    <li class="nav-item active">
-                        <a class="nav-link" href="/predictions">Predictions <span class="sr-only">(current)</span></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/data">Cold-Email</a>
+                        <a class="nav-link" href="/chatbot">
+                            <i class="fas fa-robot me-1"></i>AI Assistant
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/linkedin">LinkedIn</a>
+                        <a class="nav-link active" href="/predictions">
+                            <i class="fas fa-crystal-ball me-1"></i>Predictions
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/google-ads">Google Ads</a>
+                        <a class="nav-link" href="/data">
+                            <i class="fas fa-envelope me-1"></i>Cold-Email
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/logout">Logout</a>
+                        <a class="nav-link" href="/linkedin">
+                            <i class="fab fa-linkedin me-1"></i>LinkedIn
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/google-ads">
+                            <i class="fab fa-google me-1"></i>Google Ads
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                         <a class="nav-link" href="/logout">
+                            <i class="fas fa-sign-out-alt me-1"></i>Logout
+                        </a>
                     </li>
                 </ul>
             </div>
@@ -315,17 +805,20 @@
     </nav>
 
     <div class="container-lg mt-4">
-        <!-- Header Section -->
         <div class="row">
             <div class="col-12">
-                <div class="card mb-4">
+                <div class="card mb-4 slide-in-left">
                     <div class="card-body">
-                        <h3 class="card-title">Lead Win/Loss Predictions</h3>
-                        <p class="card-text">Automated predictions for scheduled leads using machine learning model</p>
+                        <h3 class="card-title">
+                            <i class="fas fa-crystal-ball"></i>
+                            AI Lead Win/Loss Predictions
+                        </h3>
+                        <p class="lead">Advanced machine learning predictions for scheduled leads with confidence scoring</p>
                         <button id="generate-predictions-btn" class="btn btn-primary">
-                            <i class="fas fa-magic"></i> Generate New Predictions
+                            <i class="fas fa-magic me-2"></i>
+                            Generate New Predictions
                         </button>
-                        <div class="mt-2">
+                        <div class="mt-3">
                             <small class="text-muted" id="model-info"></small>
                         </div>
                     </div>
@@ -333,65 +826,119 @@
             </div>
         </div>
 
-        <!-- Stats Section -->
         <div class="row" id="stats-section" style="display: none;">
-            <div class="col-md-3 mb-3">
-                <div class="card stats-card">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="stats-card total slide-in-left">
                     <div class="card-body text-center">
-                        <h5 class="card-title">Total Leads</h5>
-                        <h3 class="text-primary" id="total-leads">0</h3>
+                        <div class="stats-number total" id="total-leads">
+                            <i class="fas fa-users stats-icon"></i>
+                            0
+                        </div>
+                        <h6 class="text-muted mb-0">Total Leads</h6>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3 mb-3">
-                <div class="card stats-card won">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="stats-card won slide-in-left" style="animation-delay: 0.1s">
                     <div class="card-body text-center">
-                        <h5 class="card-title">Predicted Won</h5>
-                        <h3 class="text-success" id="predicted-won">0</h3>
+                        <div class="stats-number won" id="predicted-won">
+                            <i class="fas fa-trophy stats-icon"></i>
+                            0
+                        </div>
+                        <h6 class="text-muted mb-0">Predicted Won</h6>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3 mb-3">
-                <div class="card stats-card lost">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="stats-card lost slide-in-left" style="animation-delay: 0.2s">
                     <div class="card-body text-center">
-                        <h5 class="card-title">Predicted Lost</h5>
-                        <h3 class="text-danger" id="predicted-lost">0</h3>
+                        <div class="stats-number lost" id="predicted-lost">
+                            <i class="fas fa-times-circle stats-icon"></i>
+                            0
+                        </div>
+                        <h6 class="text-muted mb-0">Predicted Lost</h6>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3 mb-3">
-                <div class="card stats-card">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="stats-card confidence slide-in-left" style="animation-delay: 0.3s">
                     <div class="card-body text-center">
-                        <h5 class="card-title">Avg Confidence</h5>
-                        <h3 class="text-info" id="avg-confidence">0%</h3>
+                        <div class="stats-number confidence" id="avg-confidence">
+                            <i class="fas fa-percentage stats-icon"></i>
+                            0%
+                        </div>
+                        <h6 class="text-muted mb-0">Avg Confidence</h6>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Results Section -->
+        <div class="row" id="charts-container" style="display: none;">
+            <div class="col-lg-6 mb-4">
+                <div class="chart-card slide-in-left">
+                    <div class="chart-header">
+                        <i class="fas fa-chart-pie me-2"></i>
+                        Prediction Distribution
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="predictionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 mb-4">
+                <div class="chart-card slide-in-right">
+                    <div class="chart-header">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        Confidence Levels
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="confidenceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 mb-4">
+                <div class="chart-card fade-in">
+                    <div class="chart-header">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Prediction Confidence by Owner
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="ownerChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-12">
-                <div class="card">
+                <div class="card fade-in">
                     <div class="card-body">
-                        <h5 class="card-title">Prediction Results</h5>
+                        <h5 class="card-title">
+                            <i class="fas fa-table me-2"></i>
+                            Prediction Results
+                        </h5>
                         <div id="predictions-status">
                             <div class="alert alert-info">
-                                Click "Generate New Predictions" to get the latest predictions for scheduled leads.
+                                <i class="fas fa-info-circle me-2"></i>
+                                Click "Generate New Predictions" to get the latest AI predictions for scheduled leads.
                             </div>
                         </div>
                         <div id="predictions-table-container" style="display: none;">
                             <div class="table-container">
                                 <div class="table-controls">
                                     <div class="search-box">
-                                        <span class="search-icon">🔍</span>
+                                        <i class="fas fa-search search-icon"></i>
                                         <input type="text" id="search-input" placeholder="Search predictions...">
                                     </div>
                                     <div class="pagination-info" id="pagination-info"></div>
                                     <div class="pagination-controls" id="pagination-controls"></div>
                                     <div class="export-buttons">
-                                        <button class="export-btn" id="export-csv">📄 CSV</button>
-                                        <button class="export-btn" id="export-json">📋 JSON</button>
+                                        <button class="export-btn" id="export-csv">
+                                            <i class="fas fa-file-csv me-1"></i>CSV
+                                        </button>
+                                        <button class="export-btn" id="export-json">
+                                            <i class="fas fa-file-code me-1"></i>JSON
+                                        </button>
                                     </div>
                                 </div>
                                 <div class="table-wrapper">
@@ -405,20 +952,18 @@
         </div>
     </div>
 
-    <!-- Loading Overlay -->
     <div class="loading-overlay" id="loading-overlay">
         <div class="loading-spinner">
-            <div class="spinner-border text-light" role="status">
-                <span class="sr-only">Loading...</span>
-            </div>
-            <div class="mt-2" id="loading-text">Generating predictions...</div>
+            <div class="spinner-ring"></div>
+            <h4 id="loading-text">Generating AI predictions...</h4>
+            <p>Please wait while our machine learning model analyzes your leads</p>
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
 
     <script>
         let currentData = [];
@@ -426,14 +971,107 @@
         let currentPage = 1;
         const itemsPerPage = 25;
         let currentSort = { column: null, direction: 'asc' };
+        let chartInstances = {};
 
-        function showLoading(message = 'Generating predictions...') {
+        function showLoading(message = 'Generating AI predictions...') {
             $('#loading-text').text(message);
-            $('#loading-overlay').fadeIn();
+            $('#loading-overlay').fadeIn(300);
         }
 
         function hideLoading() {
-            $('#loading-overlay').fadeOut();
+            $('#loading-overlay').fadeOut(300);
+        }
+
+        function createAnimatedChart(canvasId, type, data, options = {}) {
+            const ctx = document.getElementById(canvasId);
+            if (!ctx) return null;
+
+            if (chartInstances[canvasId]) {
+                chartInstances[canvasId].destroy();
+            }
+
+            const colorSchemes = {
+                primary: ['rgba(102, 126, 234, 0.8)', 'rgba(118, 75, 162, 0.8)'],
+                success: ['rgba(72, 187, 120, 0.8)', 'rgba(56, 161, 105, 0.8)'],
+                danger: ['rgba(245, 101, 101, 0.8)', 'rgba(229, 62, 62, 0.8)'],
+                warning: ['rgba(237, 137, 54, 0.8)', 'rgba(221, 107, 32, 0.8)'],
+                info: ['rgba(79, 172, 254, 0.8)', 'rgba(0, 242, 254, 0.8)']
+            };
+
+            const defaultOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            color: '#4a5568',
+                            font: {
+                                family: 'Inter',
+                                weight: '500'
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: 'white',
+                        bodyColor: 'white',
+                        cornerRadius: 8,
+                        titleFont: {
+                            family: 'Inter',
+                            weight: '600'
+                        },
+                        bodyFont: {
+                            family: 'Inter',
+                            weight: '400'
+                        }
+                    }
+                },
+                animation: {
+                    duration: 2000,
+                    easing: 'easeInOutQuart'
+                },
+                scales: type !== 'pie' && type !== 'doughnut' ? {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: '#718096',
+                            font: {
+                                family: 'Inter',
+                                weight: '500'
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#718096',
+                            font: {
+                                family: 'Inter',
+                                weight: '500'
+                            }
+                        }
+                    }
+                } : undefined
+            };
+
+            const chartOptions = { ...defaultOptions, ...options };
+
+            chartInstances[canvasId] = new Chart(ctx, {
+                type: type,
+                data: data,
+                options: chartOptions
+            });
+
+            return chartInstances[canvasId];
         }
 
         function getConfidenceClass(confidence) {
@@ -459,12 +1097,98 @@
             const lostPredictions = totalLeads - wonPredictions;
             const avgConfidence = data.reduce((sum, row) => sum + row.prediction_confidence, 0) / totalLeads;
 
-            $('#stats-section').addClass('slide-up').fadeIn(800);
+            $('#stats-section').fadeIn(800);
             
             animateValue('#total-leads', 0, totalLeads, 1000);
             animateValue('#predicted-won', 0, wonPredictions, 1200);
             animateValue('#predicted-lost', 0, lostPredictions, 1400);
             animateValue('#avg-confidence', 0, Math.round(avgConfidence * 100), 1600, '%');
+        }
+
+        function createCharts(data) {
+            const wonCount = data.filter(row => row.prediction === 'Won').length;
+            const lostCount = data.length - wonCount;
+
+            const predictionData = {
+                labels: ['Won', 'Lost'],
+                datasets: [{
+                    data: [wonCount, lostCount],
+                    backgroundColor: [
+                        'rgba(72, 187, 120, 0.8)',
+                        'rgba(245, 101, 101, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(72, 187, 120, 1)',
+                        'rgba(245, 101, 101, 1)'
+                    ],
+                    borderWidth: 2
+                }]
+            };
+
+            const confidenceLevels = {
+                high: data.filter(row => row.prediction_confidence >= 0.8).length,
+                medium: data.filter(row => row.prediction_confidence >= 0.6 && row.prediction_confidence < 0.8).length,
+                low: data.filter(row => row.prediction_confidence < 0.6).length
+            };
+
+            const confidenceData = {
+                labels: ['High (80%+)', 'Medium (60-79%)', 'Low (<60%)'],
+                datasets: [{
+                    label: 'Confidence Distribution',
+                    data: [confidenceLevels.high, confidenceLevels.medium, confidenceLevels.low],
+                    backgroundColor: [
+                        'rgba(72, 187, 120, 0.8)',
+                        'rgba(237, 137, 54, 0.8)',
+                        'rgba(245, 101, 101, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(72, 187, 120, 1)',
+                        'rgba(237, 137, 54, 1)',
+                        'rgba(245, 101, 101, 1)'
+                    ],
+                    borderWidth: 2
+                }]
+            };
+
+            const ownerStats = {};
+            data.forEach(row => {
+                const owner = row.Owner || 'Unknown';
+                if (!ownerStats[owner]) {
+                    ownerStats[owner] = { total: 0, avgConfidence: 0, confidenceSum: 0 };
+                }
+                ownerStats[owner].total++;
+                ownerStats[owner].confidenceSum += row.prediction_confidence;
+                ownerStats[owner].avgConfidence = ownerStats[owner].confidenceSum / ownerStats[owner].total;
+            });
+
+            const ownerLabels = Object.keys(ownerStats);
+            const ownerConfidences = ownerLabels.map(owner => Math.round(ownerStats[owner].avgConfidence * 100));
+
+            const ownerData = {
+                labels: ownerLabels,
+                datasets: [{
+                    label: 'Average Confidence (%)',
+                    data: ownerConfidences,
+                    backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                    borderColor: 'rgba(102, 126, 234, 1)',
+                    borderWidth: 2,
+                    borderRadius: 8
+                }]
+            };
+
+            $('#charts-container').fadeIn(600);
+
+            setTimeout(() => {
+                createAnimatedChart('predictionChart', 'doughnut', predictionData);
+            }, 200);
+
+            setTimeout(() => {
+                createAnimatedChart('confidenceChart', 'bar', confidenceData);
+            }, 400);
+
+            setTimeout(() => {
+                createAnimatedChart('ownerChart', 'bar', ownerData);
+            }, 600);
         }
 
         function animateValue(selector, start, end, duration, suffix = '') {
@@ -476,7 +1200,8 @@
             let current = start;
             const timer = setInterval(function() {
                 current += increment;
-                element.text(current + suffix);
+                const displayValue = suffix ? current + suffix : current;
+                element.html(element.html().replace(/\d+%?/, displayValue));
                 if (current === end) {
                     clearInterval(timer);
                 }
@@ -539,7 +1264,6 @@
 
             const allHeaders = Object.keys(currentData[0]);
             
-            // Reorganize headers: Owner first, prediction columns last, everything else in between
             const priorityHeaders = ['Owner'];
             const predictionHeaders = ['prediction', 'prediction_confidence'];
             const middleHeaders = allHeaders.filter(h => 
@@ -549,7 +1273,6 @@
             const headers = [...priorityHeaders, ...middleHeaders, ...predictionHeaders];
             const pageData = getCurrentPageData();
 
-            // Create header
             const thead = table.append('thead');
             const headerRow = thead.append('tr');
             
@@ -562,15 +1285,13 @@
                     .style('left', index === 0 ? '0' : 'auto')
                     .style('z-index', index === 0 ? '11' : '10')
                     .style('background', index === 0 ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : null)
-                    .style('min-width', index === 0 ? '120px' : 
-                                     predictionHeaders.includes(header) ? '150px' : '100px')
+                    .style('min-width', index === 0 ? '150px' : 
+                                     predictionHeaders.includes(header) ? '180px' : '120px')
                     .on('click', () => sortData(header));
             });
 
-            // Create body
             const tbody = table.append('tbody');
             
-            // Add rows with animation
             const rows = tbody.selectAll('tr')
                 .data(pageData)
                 .enter()
@@ -578,7 +1299,6 @@
                 .style('opacity', 0)
                 .style('transform', 'translateX(-20px)');
 
-            // Animate rows in
             rows.transition()
                 .duration(500)
                 .delay((d, i) => i * 50)
@@ -594,9 +1314,9 @@
                 .style('z-index', d => d.index === 0 ? '9' : 'auto')
                 .style('background', d => d.index === 0 ? '#ffffff' : 'inherit')
                 .style('border-right', d => d.index === 0 ? '2px solid #dee2e6' : 'none')
-                .style('font-weight', d => d.index === 0 ? 'bold' : 'normal')
-                .style('min-width', d => d.index === 0 ? '120px' : 
-                                       predictionHeaders.includes(d.header) ? '150px' : '100px')
+                .style('font-weight', d => d.index === 0 ? '600' : 'normal')
+                .style('min-width', d => d.index === 0 ? '150px' : 
+                                       predictionHeaders.includes(d.header) ? '180px' : '120px')
                 .each(function(d) {
                     const cell = d3.select(this);
                     
@@ -616,14 +1336,11 @@
             const start = (currentPage - 1) * itemsPerPage + 1;
             const end = Math.min(currentPage * itemsPerPage, filteredData.length);
 
-            // Update info
             $('#pagination-info').text(`Showing ${start} to ${end} of ${filteredData.length} entries`);
 
-            // Update controls
             const controls = $('#pagination-controls');
             controls.empty();
 
-            // Previous button
             const prevBtn = $('<button class="pagination-btn">Previous</button>')
                 .prop('disabled', currentPage === 1)
                 .click(() => {
@@ -635,7 +1352,6 @@
                 });
             controls.append(prevBtn);
 
-            // Page numbers
             for (let i = 1; i <= totalPages; i++) {
                 if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
                     const pageBtn = $(`<button class="pagination-btn ${i === currentPage ? 'active' : ''}">${i}</button>`)
@@ -650,7 +1366,6 @@
                 }
             }
 
-            // Next button
             const nextBtn = $('<button class="pagination-btn">Next</button>')
                 .prop('disabled', currentPage === totalPages)
                 .click(() => {
@@ -695,33 +1410,36 @@
                     if (response.status === 'success') {
                         $('#predictions-status').html(`
                             <div class="alert alert-success">
-                                Predictions generated successfully! Model: ${response.model_info}
+                                <i class="fas fa-check-circle me-2"></i>
+                                AI predictions generated successfully! Model: ${response.model_info}
                             </div>
                         `);
                         
-                        $('#model-info').text(`Using model: ${response.model_info}`);
+                        $('#model-info').text(`Using ML model: ${response.model_info}`);
                         
                         if (response.data && response.data.length > 0) {
                             currentData = response.data;
                             filteredData = [...currentData];
                             
-                            // Sort by confidence by default
                             currentSort = { column: 'prediction_confidence', direction: 'desc' };
                             sortData('prediction_confidence');
                             
                             updateStats(response.data);
+                            createCharts(response.data);
                             
                             $('#predictions-table-container').addClass('fade-in').fadeIn(600);
                         } else {
                             $('#predictions-status').html(`
                                 <div class="alert alert-warning">
-                                    No scheduled leads found for prediction.
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    No scheduled leads found for prediction analysis.
                                 </div>
                             `);
                         }
                     } else {
                         $('#predictions-status').html(`
                             <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
                                 Error: ${response.message}
                             </div>
                         `);
@@ -730,6 +1448,7 @@
                 error: function(xhr, status, error) {
                     $('#predictions-status').html(`
                         <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
                             Error generating predictions: ${error}
                         </div>
                     `);
@@ -745,16 +1464,13 @@
                 loadPredictions();
             });
 
-            // Search functionality
             $('#search-input').on('input', function() {
                 filterData($(this).val());
             });
 
-            // Export functionality
             $('#export-csv').click(exportToCSV);
             $('#export-json').click(exportToJSON);
             
-            // Auto-load predictions on page load
             loadPredictions();
         });
     </script>

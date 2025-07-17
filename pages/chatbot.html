@@ -1,360 +1,1226 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Data Analysis Chatbot</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cleverly Sales Dashboard - AI Assistant</title>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/fixedfooter/3.3.1/css/fixedFooter.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/4.2.2/css/fixedColumns.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-        .chat-container {
-            height: 400px;
-            overflow-y: auto;
-            border: 1px solid #ccc;
-            padding: 15px;
-            margin-bottom: 15px;
-            background: #f8f9fa;
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            --light-bg: #f8fafc;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --card-hover-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            --border-radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --chat-bg: #fafbfc;
+            --user-bubble: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --bot-bubble: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            --input-bg: rgba(255, 255, 255, 0.95);
         }
-        .message {
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 5px;
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .user-message {
-            background: #007bff;
-            color: white;
-            margin-left: 20%;
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--light-bg);
+            line-height: 1.6;
+            overflow-x: hidden;
+            height: 100vh;
         }
-        .bot-message {
-            background: #e9ecef;
-            margin-right: 20%;
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            z-index: -2;
+            opacity: 0.1;
         }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
         .navbar {
-            margin-bottom: 2rem;
+            background: var(--primary-gradient) !important;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+            transition: var(--transition);
         }
-        .filters-container {
-            background: #f8f9fa;
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            border-radius: 8px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            transition: var(--transition);
+        }
+
+        .nav-link:hover::before,
+        .nav-link.active::before {
+            left: 0;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: white !important;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .card {
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            transition: var(--transition);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--primary-gradient);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        .card-title {
+            font-weight: 600;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-title i {
+            font-size: 1.2rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .form-control,
+        .form-select {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            font-weight: 500;
+            transition: var(--transition);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn {
+            border-radius: 12px;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: var(--transition);
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+        }
+
+        .btn-success {
+            background: var(--success-gradient);
+            border: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .chat-main-container {
+            height: calc(100vh - 100px);
+            display: flex;
+            gap: 1rem;
             padding: 1rem;
-            border-radius: 5px;
-            margin-bottom: 1rem;
+            position: relative;
         }
-        .data-view {
-            max-height: 400px;
+
+        .filters-sidebar {
+            width: 350px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            height: fit-content;
+            max-height: calc(100vh - 120px);
             overflow-y: auto;
-            margin: 1rem 0;
-            display: none;
+            transition: var(--transition);
+        }
+
+        .filters-sidebar:hover {
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .chat-header {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chat-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .chat-header h3 {
+            margin: 0;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .chat-header .subtitle {
+            font-weight: 400;
+            opacity: 0.9;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+            background: var(--chat-bg);
+            position: relative;
+            min-height: 400px;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(102, 126, 234, 0.3);
+            border-radius: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: rgba(102, 126, 234, 0.5);
+        }
+
+        .message {
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            animation: messageSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes messageSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user-message {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .bot-avatar {
+            background: var(--primary-gradient);
+        }
+
+        .user-avatar {
+            background: var(--secondary-gradient);
+        }
+
+        .message-content {
+            max-width: 70%;
             background: white;
-            padding: 1rem;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
+            padding: 1rem 1.5rem;
+            border-radius: 18px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+            line-height: 1.6;
+            font-weight: 500;
         }
-        .table {
-            margin-bottom: 0;
-            white-space: nowrap;
+
+        .user-message .message-content {
+            background: var(--user-bubble);
+            color: white;
+            border-bottom-right-radius: 6px;
         }
-        .table td, .table th {
-            padding: 0.5rem;
+
+        .bot-message .message-content {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-bottom-left-radius: 6px;
         }
-        .toggle-btn {
+
+        .message-content pre {
+            background: rgba(0, 0, 0, 0.05);
+            padding: 0.75rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            margin: 0.5rem 0;
+        }
+
+        .message-content code {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+            padding: 1rem 1.5rem;
+            background: white;
+            border-radius: 18px;
+            border-bottom-left-radius: 6px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #9ca3af;
+            animation: typingBounce 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .chat-input-container {
+            padding: 1.5rem;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            position: relative;
+        }
+
+        .chat-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            gap: 1rem;
+            background: var(--input-bg);
+            border: 2px solid #e2e8f0;
+            border-radius: 24px;
+            padding: 0.75rem 1rem;
+            transition: var(--transition);
+            backdrop-filter: blur(10px);
+        }
+
+        .chat-input-wrapper:focus-within {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .chat-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            resize: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            line-height: 1.5;
+            min-height: 24px;
+            max-height: 120px;
+            padding: 0.5rem 0;
+        }
+
+        .chat-input::placeholder {
+            color: #9ca3af;
+        }
+
+        .send-button {
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .send-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #6b7280;
+        }
+
+        .welcome-message i {
+            font-size: 4rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 1rem;
         }
-        .highlighted-row {
-            background-color: #fff3cd !important;
-            transition: background-color 0.3s;
+
+        .welcome-message h4 {
+            color: #374151;
+            margin-bottom: 1rem;
+            font-weight: 600;
         }
-        .highlighted-row:hover {
-            background-color: #ffe69c !important;
+
+        .welcome-suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: center;
+            margin-top: 2rem;
         }
-        .advanced-filters {
-            display: none;
-            padding-top: 1rem;
-            border-top: 1px solid #dee2e6;
+
+        .suggestion-chip {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+        }
+
+        .suggestion-chip:hover {
+            background: var(--primary-gradient);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .data-view-card {
             margin-top: 1rem;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            background: white;
+            display: none;
+        }
+
+        .data-view-header {
+            background: var(--success-gradient);
+            color: white;
+            padding: 1rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .dataTables_wrapper {
+            padding: 1.5rem;
+        }
+
+        .table {
+            margin: 0 !important;
+            border-collapse: collapse;
+            width: 100% !important;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .table th {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 11px;
+            border: none;
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+        }
+
+        .table td {
+            padding: 0.75rem;
+            border-top: 1px solid #e2e8f0;
+            white-space: nowrap;
+            vertical-align: middle;
+            transition: var(--transition);
+        }
+
+        .table tbody tr {
+            transition: var(--transition);
+        }
+
+        .table tbody tr:hover {
+            background: linear-gradient(135deg, #f7fafc, #edf2f7);
+            transform: scale(1.01);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .highlighted-row {
+            background: linear-gradient(135deg, #fef3c7, #fde68a) !important;
+            animation: highlightPulse 2s ease-in-out;
+        }
+
+        @keyframes highlightPulse {
+            0%, 100% { background: linear-gradient(135deg, #fef3c7, #fde68a) !important; }
+            50% { background: linear-gradient(135deg, #fbbf24, #f59e0b) !important; }
+        }
+
+        .slide-in-left {
+            animation: slideInLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .slide-in-right {
+            animation: slideInRight 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 9999;
+        }
+
+        .loading-spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+        }
+
+        .spinner-ring {
+            width: 60px;
+            height: 60px;
+            border: 6px solid rgba(255, 255, 255, 0.3);
+            border-top: 6px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 992px) {
+            .chat-main-container {
+                flex-direction: column;
+                height: auto;
+                gap: 1rem;
+            }
+            
+            .filters-sidebar {
+                width: 100%;
+                order: 2;
+            }
+            
+            .chat-container {
+                order: 1;
+                height: 70vh;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .chat-main-container {
+                padding: 0.5rem;
+            }
+            
+            .filters-sidebar,
+            .chat-container {
+                border-radius: 12px;
+            }
+            
+            .chat-messages {
+                padding: 1rem;
+            }
+            
+            .message-content {
+                max-width: 90%;
+            }
+            
+            .welcome-suggestions {
+                flex-direction: column;
+                align-items: center;
+            }
         }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand" href="#">Cleverly Sales Dashboard</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-chart-line me-2"></i>
+                Cleverly Sales Dashboard
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ml-auto">
+                <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/dashboard">Dashboard</a>
-                    </li>
-                    <li class="nav-item active">
-                        <a class="nav-link" href="/chatbot">Chatbot <span class="sr-only">(current)</span></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/predictions">Predictions</a>
+                        <a class="nav-link" href="/dashboard">
+                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/data">Cold-Email</a>
+                        <a class="nav-link active" href="/chatbot">
+                            <i class="fas fa-robot me-1"></i>AI Assistant
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/linkedin">LinkedIn</a>
+                        <a class="nav-link" href="/predictions">
+                            <i class="fas fa-crystal-ball me-1"></i>Predictions
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/google-ads">Google Ads</a>
+                        <a class="nav-link" href="/data">
+                            <i class="fas fa-envelope me-1"></i>Cold-Email
+                        </a>
                     </li>
                     <li class="nav-item">
-                         <a class="nav-link" href="/logout">Logout</a>
+                        <a class="nav-link" href="/linkedin">
+                            <i class="fab fa-linkedin me-1"></i>LinkedIn
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/google-ads">
+                            <i class="fab fa-google me-1"></i>Google Ads
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                         <a class="nav-link" href="/logout">
+                            <i class="fas fa-sign-out-alt me-1"></i>Logout
+                        </a>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <h2>Data Analysis Assistant</h2>
-
-                <div class="filters-container">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5>Data Filters</h5>
-                        <button class="btn btn-sm btn-secondary" id="toggleAdvancedFilters">
-                            Advanced Filters
-                        </button>
-                    </div>
-
-                    <form id="filter-form">
-                        <div class="form-row">
-                            <div class="form-group col-md-3">
-                                <label for="start_date">Start Date:</label>
-                                <input type="date" id="start_date" name="start_date" class="form-control">
-                            </div>
-                            <div class="form-group col-md-3">
-                                <label for="end_date">End Date:</label>
-                                <input type="date" id="end_date" name="end_date" class="form-control">
-                            </div>
-                            <div class="form-group col-md-3">
-                                <label for="filter_column">Filter Column:</label>
-                                <select id="filter_column" name="filter_column" class="form-control">
-                                    <option value="Date Created">Date Created</option>
-                                    <option value="Sales Call Date">Sales Call Date</option>
-                                </select>
-                            </div>
-                            <div class="form-group col-md-3">
-                                <label for="selected_owners">Select Owners:</label>
-                                <select id="selected_owners" name="selected_owners" class="form-control" multiple>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="advanced-filters" id="advancedFilters">
-                            <div class="form-row">
-                                <div class="form-group col-md-4">
-                                    <label for="owner_filter">Owner:</label>
-                                    <input type="text" id="owner_filter" class="form-control" placeholder="Filter by owner">
-                                </div>
-                                <div class="form-group col-md-4">
-                                    <label for="deal_status">Deal Status:</label>
-                                    <select id="deal_status" class="form-control">
-                                        <option value="">All</option>
-                                        <option value="won">Won</option>
-                                        <option value="lost">Lost</option>
-                                        <option value="proposal">Proposal</option>
-                                    </select>
-                                </div>
-                                <div class="form-group col-md-4">
-                                    <label for="min_deal_value">Minimum Deal Value:</label>
-                                    <input type="number" id="min_deal_value" class="form-control" placeholder="Min value">
-                                </div>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary">Apply Filters</button>
-                    </form>
+    <div class="chat-main-container">
+        <div class="filters-sidebar slide-in-left">
+            <h4 class="card-title mb-4">
+                <i class="fas fa-filter"></i>
+                Data Filters
+            </h4>
+            
+            <form id="filter-form">
+                <div class="mb-3">
+                    <label for="start_date" class="form-label">
+                        <i class="fas fa-calendar-alt me-1"></i>
+                        Start Date
+                    </label>
+                    <input type="date" id="start_date" name="start_date" class="form-control">
                 </div>
-
-                <button class="btn btn-info toggle-btn" id="toggleDataView">
+                
+                <div class="mb-3">
+                    <label for="end_date" class="form-label">
+                        <i class="fas fa-calendar-alt me-1"></i>
+                        End Date
+                    </label>
+                    <input type="date" id="end_date" name="end_date" class="form-control">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="filter_column" class="form-label">
+                        <i class="fas fa-columns me-1"></i>
+                        Filter Column
+                    </label>
+                    <select id="filter_column" name="filter_column" class="form-select">
+                        <option value="Date Created">Date Created</option>
+                        <option value="Sales Call Date">Sales Call Date</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="selected_owners" class="form-label">
+                        <i class="fas fa-users me-1"></i>
+                        Select Owners
+                    </label>
+                    <select id="selected_owners" name="selected_owners" class="form-select" multiple size="6">
+                    </select>
+                </div>
+                
+                <div class="mb-4">
+                    <button type="button" class="btn btn-outline-secondary w-100 mb-3" id="toggleAdvancedFilters">
+                        <i class="fas fa-cog me-2"></i>
+                        Advanced Filters
+                    </button>
+                    
+                    <div class="advanced-filters" id="advancedFilters" style="display: none;">
+                        <div class="mb-3">
+                            <label for="owner_filter" class="form-label">Owner Search</label>
+                            <input type="text" id="owner_filter" class="form-control" placeholder="Filter by owner">
+                        </div>
+                        <div class="mb-3">
+                            <label for="deal_status" class="form-label">Deal Status</label>
+                            <select id="deal_status" class="form-select">
+                                <option value="">All</option>
+                                <option value="won">Won</option>
+                                <option value="lost">Lost</option>
+                                <option value="proposal">Proposal</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="min_deal_value" class="form-label">Minimum Deal Value</label>
+                            <input type="number" id="min_deal_value" class="form-control" placeholder="Min value">
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100 mb-3">
+                    <i class="fas fa-filter me-2"></i>
+                    Apply Filters
+                </button>
+                
+                <button type="button" class="btn btn-success w-100" id="toggleDataView">
+                    <i class="fas fa-table me-2"></i>
                     Toggle Data View
                 </button>
+            </form>
+            
+            <div class="data-view-card" id="dataViewCard">
+                <div class="data-view-header">
+                    <i class="fas fa-database me-2"></i>
+                    Filtered Data Preview
+                </div>
+                <div class="table-responsive" id="dataView">
+                    <table class="table table-sm" id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>Loading data...</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
-                <div class="data-view" id="dataView">
-                    <div class="table-responsive">
-                        <table class="table table-striped table-sm" id="dataTable">
-                            <thead>
-                                <tr>
-                                    <th>Loading data...</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            </tbody>
-                        </table>
+        <div class="chat-container slide-in-right">
+            <div class="chat-header">
+                <h3>
+                    <i class="fas fa-robot"></i>
+                    AI Sales Data Assistant
+                </h3>
+                <div class="subtitle">Ask me anything about your sales data and performance metrics</div>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="welcome-message">
+                    <i class="fas fa-brain"></i>
+                    <h4>Welcome to your AI Sales Assistant</h4>
+                    <p>I'm here to help you analyze your sales data. You can ask me about performance metrics, trends, specific deals, or any insights you're looking for.</p>
+                    
+                    <div class="welcome-suggestions">
+                        <button class="suggestion-chip" onclick="sendSuggestion('Show me the top performing sales reps this month')">
+                            Top Performers
+                        </button>
+                        <button class="suggestion-chip" onclick="sendSuggestion('What is the average deal value?')">
+                            Average Deal Value
+                        </button>
+                        <button class="suggestion-chip" onclick="sendSuggestion('Show me trends in the last 3 months')">
+                            Recent Trends
+                        </button>
+                        <button class="suggestion-chip" onclick="sendSuggestion('Which sources generate the most revenue?')">
+                            Revenue Sources
+                        </button>
                     </div>
                 </div>
-
-                <div class="chat-container" id="chatContainer">
-                    <div class="message bot-message">
-                        Hello! I can help you analyze your filtered data. What would you like to know?
+                
+                <div class="typing-indicator" id="typingIndicator">
+                    <div class="message-avatar bot-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
                     </div>
                 </div>
-                <div class="input-group">
-                    <input type="text" id="userInput" class="form-control" placeholder="Ask a question...">
-                    <div class="input-group-append">
-                        <button class="btn btn-primary" id="sendButton">Send</button>
-                    </div>
+            </div>
+            
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <textarea 
+                        id="chatInput" 
+                        class="chat-input" 
+                        placeholder="Ask me about your sales data..."
+                        rows="1"
+                    ></textarea>
+                    <button class="send-button" id="sendButton">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <div class="spinner-ring"></div>
+            <h4 id="loadingText">Processing your request...</h4>
+            <p>Analyzing sales data with AI</p>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/fixedfooter/3.3.1/js/dataTables.fixedFooter.min.js"></script>
+    <script src="https://cdn.datatables.net/fixedcolumns/4.2.2/js/dataTables.fixedColumns.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+
     <script>
-        // Populate owners dropdown
-        function populateOwners() {
-            $.get('/get_owners', function(data) {
-                const ownersSelect = $('#selected_owners');
-                ownersSelect.empty();
-                data.owners.forEach(owner => {
-                    ownersSelect.append(new Option(owner, owner));
+        function showLoading(message = 'Processing your request...') {
+            $('#loadingText').text(message);
+            $('#loadingOverlay').fadeIn(300);
+        }
+
+        function hideLoading() {
+            $('#loadingOverlay').fadeOut(300);
+        }
+
+        function showTyping() {
+            $('#typingIndicator').css('display', 'flex');
+            scrollToBottom();
+        }
+
+        function hideTyping() {
+            $('#typingIndicator').hide();
+        }
+
+        function scrollToBottom() {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function getCurrentTime() {
+            return new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+
+        function addMessage(content, isUser = false) {
+            const messagesContainer = $('#chatMessages');
+            const welcomeMessage = messagesContainer.find('.welcome-message');
+            
+            if (welcomeMessage.length) {
+                welcomeMessage.fadeOut(400, function() {
+                    welcomeMessage.remove();
                 });
+            }
+
+            const messageHtml = `
+                <div class="message ${isUser ? 'user-message' : 'bot-message'}">
+                    <div class="message-avatar ${isUser ? 'user-avatar' : 'bot-avatar'}">
+                        <i class="fas fa-${isUser ? 'user' : 'robot'}"></i>
+                    </div>
+                    <div class="message-content">
+                        ${content}
+                        <div class="message-time">${getCurrentTime()}</div>
+                    </div>
+                </div>
+            `;
+            
+            messagesContainer.append(messageHtml);
+            scrollToBottom();
+        }
+
+        function sendSuggestion(text) {
+            $('#chatInput').val(text);
+            sendMessage();
+        }
+
+        function sendMessage() {
+            const input = $('#chatInput');
+            const message = input.val().trim();
+            
+            if (!message) return;
+
+            addMessage(message, true);
+            input.val('');
+            resizeTextarea();
+
+            showTyping();
+
+            setTimeout(() => {
+                $.ajax({
+                    url: '/chatbot',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ user_input: message }),
+                    success: function(response) {
+                        hideTyping();
+                        
+                        if (response.status === "success") {
+                            addMessage(response.response);
+
+                            if (response.relevant_data) {
+                                highlightRelevantData(response.relevant_data);
+                                $('#dataViewCard').slideDown();
+                            }
+                        } else {
+                            addMessage(`<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Error: ${response.message}</div>`);
+                        }
+                    },
+                    error: function() {
+                        hideTyping();
+                        addMessage('<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Sorry, I encountered an error. Please try again.</div>');
+                    }
+                });
+            }, 1000);
+        }
+
+        function highlightRelevantData(relevantIndices) {
+            const table = document.getElementById('dataTable');
+            const rows = table.getElementsByTagName('tr');
+
+            Array.from(rows).forEach(row => {
+                row.classList.remove('highlighted-row');
+            });
+
+            relevantIndices.forEach(index => {
+                if (rows[index]) {
+                    rows[index].classList.add('highlighted-row');
+                }
             });
         }
 
-        // Set default dates
-        const end_date = new Date('2025-12-31');
-        const start_date = new Date('2024-01-01');
-        $('#start_date').val(start_date.toISOString().split('T')[0]);
-        $('#end_date').val(end_date.toISOString().split('T')[0]);
+        function resizeTextarea() {
+            const textarea = document.getElementById('chatInput');
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+        }
 
-        // Populate owners on page load
-        $(document).ready(function() {
-            populateOwners();
-        });
+        function populateOwners() {
+            $.get('/get_owners')
+                .done(function(data) {
+                    const ownersSelect = $('#selected_owners');
+                    ownersSelect.empty();
+                    
+                    data.owners.forEach(owner => {
+                        ownersSelect.append(new Option(owner, owner));
+                    });
+                })
+                .fail(function() {
+                    console.error('Failed to load owners');
+                });
+        }
 
-        // Toggle advanced filters
-        $('#toggleAdvancedFilters').click(function() {
-            $('#advancedFilters').slideToggle();
-        });
-
-        // Toggle data view
-        $('#toggleDataView').click(function() {
-            $('#dataView').slideToggle();
-        });
-
-        // Handle filter form submission
-        $('#filter-form').submit(function(e) {
-            e.preventDefault();
-            const formData = {
-                start_date: $('#start_date').val(),
-                end_date: $('#end_date').val(),
-                filter_column: $('#filter_column').val(),
-                selected_owners: $('#selected_owners').val() || []
-            };
-
-            $.ajax({
-                url: '/apply_filters',
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(formData),
-                success: function(response) {
-                    if(response.status === 'success') {
-                        $('#chatContainer').append(`
-                            <div class="message bot-message">Applying filters and updating AI context...</div>
-                        `);
-                        $('#dataTable').html(response.table);
-
-                        // Update LLM context with new filtered data
-                        $.ajax({
-                            url: '/update_llm_context',
-                            method: 'POST',
-                            contentType: 'application/json',
-                            data: JSON.stringify(formData),
-                            success: function(contextResponse) {
-                                if(contextResponse.status === 'success') {
-                                    // Update the data view with latest filtered data
-                                    $('#dataTable').html(contextResponse.table);
-                                    $('#dataView').show();
-                                    $('#chatContainer').append(`
-                                        <div class="message bot-message">Filters applied and AI context updated with new data!</div>
-                                    `);
-                                    const container = document.getElementById('chatContainer');
-                                    container.scrollTop = container.scrollHeight;
-                                }
-                            }
-                        });
-                    } else {
-                        $('#chatContainer').append(`
-                            <div class="message bot-message error">Error applying filters: ${response.message}</div>
-                        `);
-                    }
-                    const container = document.getElementById('chatContainer');
-                    container.scrollTop = container.scrollHeight;
-                }
-            });
-
-            // Also update LLM context
-            $.ajax({
-                url: '/update_llm_context',
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(formData),
-                success: function(response) {
-                    console.log("LLM context updated");
-                }
-            });
-        });
-
-        // Handle chat messages
-        $('#sendButton').click(function() {
-            const message = $('#userInput').val().trim();
-            if (!message) return;
-
-            $('#chatContainer').append(`
-                <div class="message user-message">${message}</div>
-            `);
-            $('#userInput').val('');
-
-            $.ajax({
-                url: '/chatbot',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({ user_input: message }),
-                success: function(response) {
-                    if (response.status === "success") {
-                        $('#chatContainer').append(`
-                            <div class="message bot-message">${response.response}</div>
-                        `);
-
-                        // Highlight relevant data
-                        if (response.relevant_data) {
-                            const table = document.getElementById('dataTable');
-                            const rows = table.getElementsByTagName('tr');
-
-                            // Clear previous highlights
-                            Array.from(rows).forEach(row => {
-                                row.classList.remove('highlighted-row');
-                            });
-
-                            // Add new highlights
-                            response.relevant_data.forEach(index => {
-                                if (rows[index]) {
-                                    rows[index].classList.add('highlighted-row');
-                                }
-                            });
-
-                            // Show the data view
-                            $('#dataView').show();
-                        }
-                    } else {
-                        $('#chatContainer').append(`
-                            <div class="message bot-message error">Error: ${response.message}</div>
-                        `);
-                    }
-                    const container = document.getElementById('chatContainer');
-                    container.scrollTop = container.scrollHeight;
-                }
-            });
-        });
-
-        $('#userInput').keypress(function(e) {
-            if(e.which == 13) {
-                $('#sendButton').click();
+        function initializeDataTable() {
+            if ($.fn.DataTable.isDataTable('#dataTable')) {
+                $('#dataTable').DataTable().destroy();
             }
+
+            $('#dataTable').DataTable({
+                scrollX: true,
+                scrollY: '300px',
+                scrollCollapse: true,
+                paging: false,
+                searching: false,
+                info: false,
+                order: [],
+                columnDefs: [{
+                    targets: '_all',
+                    className: 'text-nowrap'
+                }]
+            });
+        }
+
+        $(document).ready(function() {
+            const endDate = new Date('2025-12-31');
+            const startDate = new Date('2024-01-01');
+            $('#start_date').val(startDate.toISOString().split('T')[0]);
+            $('#end_date').val(endDate.toISOString().split('T')[0]);
+
+            populateOwners();
+
+            $('#chatInput').on('input', resizeTextarea);
+
+            $('#chatInput').on('keypress', function(e) {
+                if (e.which === 13 && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            $('#sendButton').on('click', sendMessage);
+
+            $('#toggleAdvancedFilters').on('click', function() {
+                $('#advancedFilters').slideToggle();
+            });
+
+            $('#toggleDataView').on('click', function() {
+                $('#dataViewCard').slideToggle();
+            });
+
+            $('#filter-form').on('submit', function(e) {
+                e.preventDefault();
+                
+                showLoading('Applying filters and updating AI context...');
+
+                const formData = {
+                    start_date: $('#start_date').val(),
+                    end_date: $('#end_date').val(),
+                    filter_column: $('#filter_column').val(),
+                    selected_owners: $('#selected_owners').val() || []
+                };
+
+                $.ajax({
+                    url: '/apply_filters',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            addMessage('<div class="alert alert-info mb-0"><i class="fas fa-filter me-2"></i>Filters applied successfully! Updating AI context with new data...</div>');
+                            
+                            $('#dataTable').html(response.table);
+                            initializeDataTable();
+
+                            $.ajax({
+                                url: '/update_llm_context',
+                                method: 'POST',
+                                contentType: 'application/json',
+                                data: JSON.stringify(formData),
+                                success: function(contextResponse) {
+                                    if (contextResponse.status === 'success') {
+                                        $('#dataTable').html(contextResponse.table);
+                                        initializeDataTable();
+                                        $('#dataViewCard').slideDown();
+                                        addMessage('<div class="alert alert-success mb-0"><i class="fas fa-check-circle me-2"></i>Perfect! AI context updated with your filtered data. You can now ask questions about this specific dataset.</div>');
+                                    }
+                                },
+                                complete: function() {
+                                    hideLoading();
+                                }
+                            });
+                        } else {
+                            addMessage(`<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Error applying filters: ${response.message}</div>`);
+                            hideLoading();
+                        }
+                    },
+                    error: function() {
+                        addMessage('<div class="alert alert-danger mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Error applying filters. Please try again.</div>');
+                        hideLoading();
+                    }
+                });
+
+                $.ajax({
+                    url: '/update_llm_context',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData)
+                });
+            });
         });
     </script>
 </body>
