@@ -1515,7 +1515,7 @@ def apply_filters_google_ads():
         def _filter(df: pd.DataFrame, date_col: str) -> pd.DataFrame:
             if date_col not in df.columns or df.empty:
                 return df.iloc[0:0]  # empty with same columns
-            dates = pd.to_datetime(df[date_col].apply(extract_date), errors="coerce").dt.date
+            dates = pd.to_datetime(df[date_col].apply(extract_date), format='mixed', errors="coerce").dt.date
             mask = ((dates >= pd.to_datetime(st_date).date()) & 
                    (dates <= pd.to_datetime(end_date).date()))
             return df.loc[mask]

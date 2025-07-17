@@ -14,7 +14,7 @@ import numpy as np
 
 from dataclasses import dataclass
 from datetime import date
-from typing import Callable, Final
+from typing import Callable, Final, Tuple
 
 import numpy as np
 import pandas as pd
@@ -1108,10 +1108,14 @@ def process_data_COLD_EMAIL(
         )
 
     kpi["New Calls Booked"] = _count(all_stages)
+    
+    # For metrics related to actual sales calls, use Sales Call Date if available, otherwise fall back to filter_column
+    sales_call_date_col = "Sales Call Date" if "Sales Call Date" in all_stages.columns else filter_column
+    
     kpi["Sales Call Taken"] = _count(
-        pd.concat([op_unqualified, op_proposal, op_won, op_lost], copy=False)
+        pd.concat([op_unqualified, op_proposal, op_won, op_lost], copy=False), sales_call_date_col
     )
-    kpi["Unqualified"] = _count(op_unqualified)
+    kpi["Unqualified"] = _count(op_unqualified, "Sales Call Date" if "Sales Call Date" in all_stages.columns else filter_column)
     kpi["Cancelled Calls"] = _count(op_cancelled)
 
     prop_date_col = (
@@ -1312,7 +1316,7 @@ def process_data_Google_Ads(
 # ──────────────────────────────  Helpers  ──────────────────────────────── #
 def _coerce_date_series(series: pd.Series) -> pd.Series:
     """Vectorised →date conversion (returns `datetime.date` or `NaT`)."""
-    return pd.to_datetime(series, errors="coerce").dt.date
+    return pd.to_datetime(series, format='mixed', errors="coerce").dt.date
 
 
 def _filter_by_date(
@@ -1563,7 +1567,7 @@ def process_data_LINKEDIN(
 
     kpi["New Calls Booked"] = _count(all_stages)
     kpi["Sales Call Taken"] = _count(
-        pd.concat([op_unqualified, op_proposal, op_won, op_lost], copy=False)
+        pd.concat([op_unqualified, op_proposal, op_won, op_lost], copy=False), "Sales Call Date" if "Sales Call Date" in all_stages.columns else filter_column
     )
     kpi["Unqualified"] = _count(op_unqualified)
     kpi["Cancelled Calls"] = _count(op_cancelled)
@@ -1668,9 +1672,9 @@ def process_data_GOOGLE_ADS_KPI(
 
     kpi["New Calls Booked"] = _count(all_stages)
     kpi["Sales Call Taken"] = _count(
-        pd.concat([op_unqualified, op_proposal, op_won, op_lost], copy=False)
+        pd.concat([op_unqualified, op_proposal, op_won, op_lost], copy=False), "Sales Call Date" if "Sales Call Date" in all_stages.columns else filter_column
     )
-    kpi["Unqualified"] = _count(op_unqualified)
+    kpi["Unqualified"] = _count(op_unqualified, "Sales Call Date" if "Sales Call Date" in all_stages.columns else filter_column)
     kpi["Cancelled Calls"] = _count(op_cancelled)
 
     prop_date_col = (
