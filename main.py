@@ -1797,5 +1797,189 @@ def apply_filters_LinkedIn():
         logger.debug("Traceback:\n%s", traceback.format_exc())
         return jsonify({"status": "error", "message": str(e)})
 
+
+@app.route('/train_leadnet_model', methods=['POST'])
+@login_required
+def train_leadnet_model():
+    try:
+        from enhanced_lead_prediction import LeadNetPipeline
+        
+        pipeline = LeadNetPipeline()
+        result = pipeline.train_model()
+        
+        if result["status"] == "success":
+            logger.info(f"LeadNet model training completed successfully")
+            return jsonify({
+                "status": "success",
+                "message": "Model trained successfully",
+                "metrics": result["metrics"],
+                "model_path": result["model_path"],
+                "data_samples": result["data_samples"]
+            })
+        else:
+            logger.error(f"LeadNet model training failed: {result['message']}")
+            return jsonify({
+                "status": "error",
+                "message": result["message"]
+            })
+            
+    except Exception as e:
+        logger.error(f"Error in train_leadnet_model: {e}")
+        logger.debug("Traceback:\n%s", traceback.format_exc())
+        return jsonify({"status": "error", "message": str(e)})
+
+
+@app.route('/get_training_progress', methods=['GET'])
+@login_required
+def get_training_progress():
+    try:
+        import json
+        from pathlib import Path
+        
+        progress_file = Path("./logs/training_progress.json")
+        
+        if not progress_file.exists():
+            return jsonify({
+                "status": "no_data",
+                "message": "No training progress data available"
+            })
+        
+        with open(progress_file, 'r') as f:
+            progress_data = json.load(f)
+        
+        # Get the latest 50 entries
+        latest_progress = progress_data[-50:] if len(progress_data) > 50 else progress_data
+        
+        return jsonify({
+            "status": "success",
+            "progress": latest_progress,
+            "total_entries": len(progress_data)
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting training progress: {e}")
+        return jsonify({"status": "error", "message": str(e)})
+
+
+@app.route('/generate_leadnet_predictions', methods=['POST'])
+@login_required
+def generate_leadnet_predictions():
+    try:
+        from enhanced_lead_prediction import LeadNetPipeline
+        import pandas as pd
+        import numpy as np
+        
+        pipeline = LeadNetPipeline()
+        predictions = pipeline.run_predictions()
+        
+        def clean_value(value):
+            """Clean NaN, None, and other problematic values for JSON serialization"""
+            if pd.isna(value) or value is None or value == np.nan:
+                return "Unknown"
+            if isinstance(value, (np.integer, np.floating)):
+                if np.isnan(value) or np.isinf(value):
+                    return "Unknown"
+                return float(value)
+            if isinstance(value, str) and value.lower() in ['nan', 'none', '']:
+                return "Unknown"
+            return str(value)
+        
+        # Convert predictions to the format expected by the frontend
+        formatted_predictions = []
+        for pred in predictions:
+            if "error" not in pred:
+                formatted_prediction = {
+                    "Owner": clean_value(pred["lead_data"].get("Owner", "Unknown")),
+                    "Company": clean_value(pred["lead_data"].get("Company", "Unknown")),
+                    "Email": clean_value(pred["lead_data"].get("Email", "Unknown")),
+                    "Linkedin": clean_value(pred["lead_data"].get("Linkedin", "Unknown")),
+                    "Interested In": clean_value(pred["lead_data"].get("Interested In", "Unknown")),
+                    "Plan Type": clean_value(pred["lead_data"].get("Plan Type", "Unknown")),
+                    "UTM Medium": clean_value(pred["lead_data"].get("UTM Medium", "Unknown")),
+                    "origin": clean_value(pred["lead_data"].get("origin", "Unknown")),
+                    "prediction": clean_value(pred["prediction"]),
+                    "prediction_confidence": float(pred["confidence"]) if not pd.isna(pred["confidence"]) else 0.0
+                }
+            else:
+                formatted_prediction = {
+                    "Owner": clean_value(pred["lead_data"].get("Owner", "Unknown")),
+                    "Company": clean_value(pred["lead_data"].get("Company", "Unknown")),
+                    "Email": clean_value(pred["lead_data"].get("Email", "Unknown")),
+                    "Linkedin": clean_value(pred["lead_data"].get("Linkedin", "Unknown")),
+                    "Interested In": clean_value(pred["lead_data"].get("Interested In", "Unknown")),
+                    "Plan Type": clean_value(pred["lead_data"].get("Plan Type", "Unknown")),
+                    "UTM Medium": clean_value(pred["lead_data"].get("UTM Medium", "Unknown")),
+                    "origin": clean_value(pred["lead_data"].get("origin", "Unknown")),
+                    "prediction": "Error",
+                    "prediction_confidence": 0.0,
+                    "error": clean_value(pred.get("error", "Unknown error"))
+                }
+            
+            formatted_predictions.append(formatted_prediction)
+        
+        successful_predictions = len([p for p in predictions if "error" not in p])
+        
+        logger.info(f"Generated {len(formatted_predictions)} LeadNet predictions ({successful_predictions} successful)")
+        
+        return jsonify({
+            "status": "success",
+            "data": formatted_predictions,
+            "model_info": "LeadNet v4 - Wide & Deep Neural Network",
+            "total_predictions": len(formatted_predictions),
+            "successful_predictions": successful_predictions
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in generate_leadnet_predictions: {e}")
+        logger.debug("Traceback:\n%s", traceback.format_exc())
+        return jsonify({"status": "error", "message": str(e)})
+
+
+@app.route('/check_model_status', methods=['GET'])
+@login_required
+def check_model_status():
+    try:
+        from pathlib import Path
+        import os
+        
+        model_path = Path("./models_weights/leadnet_best.keras")
+        preprocessed_data_path = Path("./prepped_data/preprocessed_data.csv")
+        
+        model_exists = model_path.exists()
+        data_exists = preprocessed_data_path.exists()
+        
+        status = {
+            "model_trained": model_exists,
+            "data_preprocessed": data_exists,
+            "model_path": str(model_path) if model_exists else None,
+            "data_path": str(preprocessed_data_path) if data_exists else None
+        }
+        
+        if model_exists:
+            status["model_size"] = os.path.getsize(model_path)
+            status["model_modified"] = model_path.stat().st_mtime
+        
+        if data_exists:
+            status["data_size"] = os.path.getsize(preprocessed_data_path)
+            status["data_modified"] = preprocessed_data_path.stat().st_mtime
+        
+        # Check for available training data
+        from enhanced_lead_prediction import DynamicPathManager
+        path_manager = DynamicPathManager()
+        available_files = path_manager.get_latest_files()
+        
+        status["training_data_available"] = bool(available_files['won'] and available_files['lost'])
+        status["prediction_data_available"] = bool(available_files['scheduled'])
+        status["available_files"] = available_files
+        
+        return jsonify({
+            "status": "success",
+            "model_status": status
+        })
+        
+    except Exception as e:
+        logger.error(f"Error checking model status: {e}")
+        return jsonify({"status": "error", "message": str(e)})
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

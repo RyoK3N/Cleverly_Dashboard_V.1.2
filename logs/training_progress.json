@@ -1,0 +1,708 @@
+[
+  {
+    "timestamp": "2025-07-18T06:43:07.845027",
+    "message": "Prediction failed: No trained model found. Please train a model first.",
+    "data": {
+      "error": "No trained model found. Please train a model first."
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:43:21.849039",
+    "message": "Starting model training pipeline",
+    "data": {}
+  },
+  {
+    "timestamp": "2025-07-18T06:43:21.849889",
+    "message": "Loading training data",
+    "data": {
+      "won_file": "sessions/sessions/won_20250715_221344.csv",
+      "lost_file": "sessions/sessions/lost_20250715_221344.csv"
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:43:21.897375",
+    "message": "Data loaded",
+    "data": {
+      "won_samples": 1995,
+      "lost_samples": 3153
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:43:21.911437",
+    "message": "Data cleaned",
+    "data": {
+      "original_shape": [
+        5148,
+        32
+      ],
+      "cleaned_shape": [
+        5129,
+        11
+      ],
+      "dropped_columns": [
+        "Follow Up Tracker",
+        "Notes",
+        "Deal Value",
+        "Email Template #1",
+        "Email Template #2",
+        "Send Panda Doc?",
+        "UTM Source",
+        "UTM Campaign",
+        "UTM Content",
+        "Lead Source",
+        "Channel FOR FUNNEL METRICS",
+        "Subitems",
+        "text_mkr7frmd",
+        "color_mks814yp"
+      ]
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:43:21.913288",
+    "message": "Removed null UTM links",
+    "data": {
+      "original_samples": 5129,
+      "remaining_samples": 2923
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:43:21.916456",
+    "message": "Dataset balanced",
+    "data": {
+      "won_samples": 784,
+      "lost_samples": 784,
+      "total_samples": 1568
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:43:21.920863",
+    "message": "Missing values filled",
+    "data": {
+      "missing_before": 44,
+      "missing_after": 0
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:43:21.930876",
+    "message": "Preprocessed data saved",
+    "data": {
+      "file_path": "./prepped_data/preprocessed_data.csv",
+      "samples": 1568
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:43:21.994127",
+    "message": "Starting cross-validation training",
+    "data": {
+      "folds": 5,
+      "model_dir": "models_weights"
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:43:35.029800",
+    "message": "Training completed",
+    "data": {
+      "metrics": {
+        "fold_aucs": [
+          0.8223457341068603,
+          0.8169905472838656,
+          0.7802750618686356,
+          0.7951167728237792,
+          0.807855626326964
+        ],
+        "mean_auc": 0.804516748482021,
+        "std_auc": 0.015235717262145567,
+        "best_fold": 1
+      },
+      "best_model": "models_weights/leadnet_best.keras"
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:43:41.585307",
+    "message": "Starting predictions",
+    "data": {
+      "scheduled_file": "sessions/sessions/scheduled_20250715_221344.csv",
+      "model_path": "./models_weights/leadnet_best.keras"
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:43:42.324299",
+    "message": "Predictions completed",
+    "data": {
+      "total_predictions": 83,
+      "successful_predictions": 83
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:46:29.028886",
+    "message": "Starting predictions",
+    "data": {
+      "scheduled_file": "sessions/sessions/scheduled_20250715_221344.csv",
+      "model_path": "./models_weights/leadnet_best.keras"
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:46:29.776105",
+    "message": "Predictions completed",
+    "data": {
+      "total_predictions": 83,
+      "successful_predictions": 83
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:47:39.526215",
+    "message": "Starting predictions",
+    "data": {
+      "scheduled_file": "sessions/sessions/scheduled_20250715_221344.csv",
+      "model_path": "./models_weights/leadnet_best.keras"
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:47:40.314810",
+    "message": "Predictions completed",
+    "data": {
+      "total_predictions": 83,
+      "successful_predictions": 83
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:48:29.644628",
+    "message": "Starting model training pipeline",
+    "data": {}
+  },
+  {
+    "timestamp": "2025-07-18T06:48:29.646272",
+    "message": "Loading training data",
+    "data": {
+      "won_file": "sessions/sessions/won_20250715_221344.csv",
+      "lost_file": "sessions/sessions/lost_20250715_221344.csv"
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:48:29.694345",
+    "message": "Data loaded",
+    "data": {
+      "won_samples": 1995,
+      "lost_samples": 3153
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:48:29.705104",
+    "message": "Data cleaned",
+    "data": {
+      "original_shape": [
+        5148,
+        32
+      ],
+      "cleaned_shape": [
+        5129,
+        11
+      ],
+      "dropped_columns": [
+        "Follow Up Tracker",
+        "Notes",
+        "Deal Value",
+        "Email Template #1",
+        "Email Template #2",
+        "Send Panda Doc?",
+        "UTM Source",
+        "UTM Campaign",
+        "UTM Content",
+        "Lead Source",
+        "Channel FOR FUNNEL METRICS",
+        "Subitems",
+        "text_mkr7frmd",
+        "color_mks814yp"
+      ]
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:48:29.706679",
+    "message": "Removed null UTM links",
+    "data": {
+      "original_samples": 5129,
+      "remaining_samples": 2923
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:48:29.709815",
+    "message": "Dataset balanced",
+    "data": {
+      "won_samples": 784,
+      "lost_samples": 784,
+      "total_samples": 1568
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:48:29.713070",
+    "message": "Missing values filled",
+    "data": {
+      "missing_before": 44,
+      "missing_after": 0
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:48:29.723832",
+    "message": "Preprocessed data saved",
+    "data": {
+      "file_path": "./prepped_data/preprocessed_data.csv",
+      "samples": 1568
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:48:29.744902",
+    "message": "Starting cross-validation training",
+    "data": {
+      "folds": 5,
+      "model_dir": "models_weights"
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:48:44.870733",
+    "message": "Training completed",
+    "data": {
+      "metrics": {
+        "fold_aucs": [
+          0.8341109172785913,
+          0.8230354172583066,
+          0.7817355673658161,
+          0.7820104523926179,
+          0.7920953780826392
+        ],
+        "mean_auc": 0.8025975464755941,
+        "std_auc": 0.02181809000627765,
+        "best_fold": 1
+      },
+      "best_model": "models_weights/leadnet_best.keras"
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:50:22.263726",
+    "message": "Starting model training pipeline",
+    "data": {}
+  },
+  {
+    "timestamp": "2025-07-18T06:50:22.266056",
+    "message": "Loading training data",
+    "data": {
+      "won_file": "sessions/sessions/won_20250715_221344.csv",
+      "lost_file": "sessions/sessions/lost_20250715_221344.csv"
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:50:22.314175",
+    "message": "Data loaded",
+    "data": {
+      "won_samples": 1995,
+      "lost_samples": 3153
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:50:22.325476",
+    "message": "Data cleaned",
+    "data": {
+      "original_shape": [
+        5148,
+        32
+      ],
+      "cleaned_shape": [
+        5129,
+        11
+      ],
+      "dropped_columns": [
+        "Follow Up Tracker",
+        "Notes",
+        "Deal Value",
+        "Email Template #1",
+        "Email Template #2",
+        "Send Panda Doc?",
+        "UTM Source",
+        "UTM Campaign",
+        "UTM Content",
+        "Lead Source",
+        "Channel FOR FUNNEL METRICS",
+        "Subitems",
+        "text_mkr7frmd",
+        "color_mks814yp"
+      ]
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:50:22.327677",
+    "message": "Removed null UTM links",
+    "data": {
+      "original_samples": 5129,
+      "remaining_samples": 2923
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:50:22.330456",
+    "message": "Dataset balanced",
+    "data": {
+      "won_samples": 784,
+      "lost_samples": 784,
+      "total_samples": 1568
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:50:22.333648",
+    "message": "Missing values filled",
+    "data": {
+      "missing_before": 44,
+      "missing_after": 0
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:50:22.344464",
+    "message": "Preprocessed data saved",
+    "data": {
+      "file_path": "./prepped_data/preprocessed_data.csv",
+      "samples": 1568
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:50:22.379734",
+    "message": "Starting cross-validation training",
+    "data": {
+      "folds": 5,
+      "model_dir": "models_weights"
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:50:35.757537",
+    "message": "Training completed",
+    "data": {
+      "metrics": {
+        "fold_aucs": [
+          0.8111890948922876,
+          0.8270112377784089,
+          0.7799099354943406,
+          0.7633512983831455,
+          0.7975665523436224
+        ],
+        "mean_auc": 0.7958056237783611,
+        "std_auc": 0.022447710533264744,
+        "best_fold": 2
+      },
+      "best_model": "models_weights/leadnet_best.keras"
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:51:22.796062",
+    "message": "Starting predictions",
+    "data": {
+      "scheduled_file": "sessions/sessions/scheduled_20250715_221344.csv",
+      "model_path": "./models_weights/leadnet_best.keras"
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:51:23.674201",
+    "message": "Predictions completed",
+    "data": {
+      "total_predictions": 83,
+      "successful_predictions": 83
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:54:17.899262",
+    "message": "Starting predictions",
+    "data": {
+      "scheduled_file": "sessions/sessions/scheduled_20250715_221344.csv",
+      "model_path": "./models_weights/leadnet_best.keras"
+    }
+  },
+  {
+    "timestamp": "2025-07-18T06:54:18.668530",
+    "message": "Predictions completed",
+    "data": {
+      "total_predictions": 83,
+      "successful_predictions": 83
+    }
+  },
+  {
+    "timestamp": "2025-07-18T07:02:40.768998",
+    "message": "Starting predictions",
+    "data": {
+      "scheduled_file": "sessions/sessions/scheduled_20250715_221344.csv",
+      "model_path": "./models_weights/leadnet_best.keras"
+    }
+  },
+  {
+    "timestamp": "2025-07-18T07:02:41.629208",
+    "message": "Predictions completed",
+    "data": {
+      "total_predictions": 83,
+      "successful_predictions": 83
+    }
+  },
+  {
+    "timestamp": "2025-07-18T07:08:02.235699",
+    "message": "Starting model training pipeline",
+    "data": {}
+  },
+  {
+    "timestamp": "2025-07-18T07:08:02.237474",
+    "message": "Loading training data",
+    "data": {
+      "won_file": "sessions/sessions/won_20250715_221344.csv",
+      "lost_file": "sessions/sessions/lost_20250715_221344.csv"
+    }
+  },
+  {
+    "timestamp": "2025-07-18T07:08:02.294592",
+    "message": "Data loaded",
+    "data": {
+      "won_samples": 1995,
+      "lost_samples": 3153
+    }
+  },
+  {
+    "timestamp": "2025-07-18T07:08:02.310796",
+    "message": "Data cleaned",
+    "data": {
+      "original_shape": [
+        5148,
+        32
+      ],
+      "cleaned_shape": [
+        5129,
+        11
+      ],
+      "dropped_columns": [
+        "Follow Up Tracker",
+        "Notes",
+        "Deal Value",
+        "Email Template #1",
+        "Email Template #2",
+        "Send Panda Doc?",
+        "UTM Source",
+        "UTM Campaign",
+        "UTM Content",
+        "Lead Source",
+        "Channel FOR FUNNEL METRICS",
+        "Subitems",
+        "text_mkr7frmd",
+        "color_mks814yp"
+      ]
+    }
+  },
+  {
+    "timestamp": "2025-07-18T07:08:02.312607",
+    "message": "Removed null UTM links",
+    "data": {
+      "original_samples": 5129,
+      "remaining_samples": 2923
+    }
+  },
+  {
+    "timestamp": "2025-07-18T07:08:02.317506",
+    "message": "Dataset balanced",
+    "data": {
+      "won_samples": 784,
+      "lost_samples": 784,
+      "total_samples": 1568
+    }
+  },
+  {
+    "timestamp": "2025-07-18T07:08:02.321823",
+    "message": "Missing values filled",
+    "data": {
+      "missing_before": 44,
+      "missing_after": 0
+    }
+  },
+  {
+    "timestamp": "2025-07-18T07:08:02.334052",
+    "message": "Preprocessed data saved",
+    "data": {
+      "file_path": "./prepped_data/preprocessed_data.csv",
+      "samples": 1568
+    }
+  },
+  {
+    "timestamp": "2025-07-18T07:08:02.437007",
+    "message": "Starting cross-validation training",
+    "data": {
+      "folds": 5,
+      "model_dir": "models_weights"
+    }
+  },
+  {
+    "timestamp": "2025-07-18T07:08:14.745672",
+    "message": "Training completed",
+    "data": {
+      "metrics": {
+        "fold_aucs": [
+          0.8223457341068603,
+          0.8169905472838656,
+          0.7802750618686356,
+          0.7951167728237792,
+          0.807855626326964
+        ],
+        "mean_auc": 0.804516748482021,
+        "std_auc": 0.015235717262145567,
+        "best_fold": 1
+      },
+      "best_model": "models_weights/leadnet_best.keras"
+    }
+  },
+  {
+    "timestamp": "2025-07-18T07:08:19.268835",
+    "message": "Starting predictions",
+    "data": {
+      "scheduled_file": "sessions/sessions/scheduled_20250715_221344.csv",
+      "model_path": "./models_weights/leadnet_best.keras"
+    }
+  },
+  {
+    "timestamp": "2025-07-18T07:08:20.017482",
+    "message": "Predictions completed",
+    "data": {
+      "total_predictions": 83,
+      "successful_predictions": 83
+    }
+  },
+  {
+    "timestamp": "2025-07-18T07:10:12.032616",
+    "message": "Starting predictions",
+    "data": {
+      "scheduled_file": "sessions/sessions/scheduled_20250715_221344.csv",
+      "model_path": "./models_weights/leadnet_best.keras"
+    }
+  },
+  {
+    "timestamp": "2025-07-18T07:10:12.807905",
+    "message": "Predictions completed",
+    "data": {
+      "total_predictions": 83,
+      "successful_predictions": 83
+    }
+  },
+  {
+    "timestamp": "2025-07-18T07:14:06.333753",
+    "message": "Starting model training pipeline",
+    "data": {}
+  },
+  {
+    "timestamp": "2025-07-18T07:14:06.336170",
+    "message": "Loading training data",
+    "data": {
+      "won_file": "sessions/sessions/won_20250715_221344.csv",
+      "lost_file": "sessions/sessions/lost_20250715_221344.csv"
+    }
+  },
+  {
+    "timestamp": "2025-07-18T07:14:06.394808",
+    "message": "Data loaded",
+    "data": {
+      "won_samples": 1995,
+      "lost_samples": 3153
+    }
+  },
+  {
+    "timestamp": "2025-07-18T07:14:06.413553",
+    "message": "Data cleaned",
+    "data": {
+      "original_shape": [
+        5148,
+        32
+      ],
+      "cleaned_shape": [
+        5129,
+        11
+      ],
+      "dropped_columns": [
+        "Follow Up Tracker",
+        "Notes",
+        "Deal Value",
+        "Email Template #1",
+        "Email Template #2",
+        "Send Panda Doc?",
+        "UTM Source",
+        "UTM Campaign",
+        "UTM Content",
+        "Lead Source",
+        "Channel FOR FUNNEL METRICS",
+        "Subitems",
+        "text_mkr7frmd",
+        "color_mks814yp"
+      ]
+    }
+  },
+  {
+    "timestamp": "2025-07-18T07:14:06.415299",
+    "message": "Removed null UTM links",
+    "data": {
+      "original_samples": 5129,
+      "remaining_samples": 2923
+    }
+  },
+  {
+    "timestamp": "2025-07-18T07:14:06.420523",
+    "message": "Dataset balanced",
+    "data": {
+      "won_samples": 784,
+      "lost_samples": 784,
+      "total_samples": 1568
+    }
+  },
+  {
+    "timestamp": "2025-07-18T07:14:06.423761",
+    "message": "Missing values filled",
+    "data": {
+      "missing_before": 44,
+      "missing_after": 0
+    }
+  },
+  {
+    "timestamp": "2025-07-18T07:14:06.435146",
+    "message": "Preprocessed data saved",
+    "data": {
+      "file_path": "./prepped_data/preprocessed_data.csv",
+      "samples": 1568
+    }
+  },
+  {
+    "timestamp": "2025-07-18T07:14:06.520059",
+    "message": "Starting cross-validation training",
+    "data": {
+      "folds": 5,
+      "model_dir": "models_weights"
+    }
+  },
+  {
+    "timestamp": "2025-07-18T07:14:18.895813",
+    "message": "Training completed",
+    "data": {
+      "metrics": {
+        "fold_aucs": [
+          0.8223457341068603,
+          0.8169905472838656,
+          0.7802750618686356,
+          0.7951167728237792,
+          0.807855626326964
+        ],
+        "mean_auc": 0.804516748482021,
+        "std_auc": 0.015235717262145567,
+        "best_fold": 1
+      },
+      "best_model": "models_weights/leadnet_best.keras"
+    }
+  },
+  {
+    "timestamp": "2025-07-18T07:14:25.046932",
+    "message": "Starting predictions",
+    "data": {
+      "scheduled_file": "sessions/sessions/scheduled_20250715_221344.csv",
+      "model_path": "./models_weights/leadnet_best.keras"
+    }
+  },
+  {
+    "timestamp": "2025-07-18T07:14:25.790005",
+    "message": "Predictions completed",
+    "data": {
+      "total_predictions": 83,
+      "successful_predictions": 83
+    }
+  }
+]

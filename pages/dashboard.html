@@ -915,10 +915,6 @@
         }
 
         function applyFilters() {
-            if ($('#loading-overlay').is(':visible')) {
-                return;
-            }
-            
             showLoading('Processing data with advanced analytics...');
 
             const startDate = $('#start_date').val();
@@ -940,25 +936,25 @@
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(data),
-                timeout: 30000,
                 success: function(response) {
                     if (response.status === 'success') {
                         const statusDiv = $('#status');
                         
+                        // Destroy existing DataTable
                         if ($.fn.DataTable.isDataTable('#data-table table')) {
-                            $('#data-table table').DataTable().clear().destroy();
+                            $('#data-table table').DataTable().destroy();
                         }
                         
+                        // Clear existing charts
                         Object.values(chartInstances).forEach(chart => {
-                            if (chart && typeof chart.destroy === 'function') {
-                                chart.destroy();
-                            }
+                            if (chart) chart.destroy();
                         });
                         chartInstances = {};
 
                         statusDiv.fadeOut(400, function() {
                             let tableHtml = response.table;
 
+                            // Parse table data for charts
                             const parser = new DOMParser();
                             const doc = parser.parseFromString(tableHtml, 'text/html');
                             const table = doc.querySelector('table');
@@ -967,21 +963,25 @@
                                 Array.from(tr.querySelectorAll('td')).map(td => td.textContent.trim())
                             );
 
+                            // Filter out the "Total" row for charts
                             const chartData = rows.filter(row => row[0] !== 'Total');
 
+                            // Extract data for charts
                             const owners = chartData.map(row => row[headers.indexOf('Owner')]);
                             const newCalls = chartData.map(row => parseFloat(row[headers.indexOf('New Calls Booked')]) || 0);
                             const salesCalls = chartData.map(row => parseFloat(row[headers.indexOf('Sales Call Taken')]) || 0);
-                            const revenue = chartData.map(row => {
-                                const value = row[headers.indexOf('Revenue')];
-                                return parseFloat(value?.replace(/[$,]/g, '')) || 0;
-                            });
-                            const closeRate = chartData.map(row => parseFloat(row[headers.indexOf('Close Rate')]) || 0);
+                            const revenuePerCall = chartData.map(row => parseFloat(row[headers.indexOf('Revenue Per Call $')]) || 0);
+                            const closedRevenue = chartData.map(row => parseFloat(row[headers.indexOf('Closed Revenue $')]) || 0);
+                            const closeRate = chartData.map(row => parseFloat(row[headers.indexOf('Close Rate %')]) || 0);
 
+                            // Show charts container with animation
+                            $('#charts-container').fadeIn(600);
+
+                            // Create animated charts
                             setTimeout(() => {
                                 createAnimatedChart('newCallsChart', 'bar', {
-                                    labels: owners,
-                                    datasets: [{
+                                        labels: owners,
+                                        datasets: [{
                                         label: 'New Calls Booked',
                                         data: newCalls
                                     }]
@@ -989,24 +989,34 @@
                             }, 200);
 
                             setTimeout(() => {
-                                createAnimatedChart('salesCallsChart', 'bar', {
+                                createAnimatedChart('salesCallsChart', 'line', {
                                     labels: owners,
                                     datasets: [{
-                                        label: 'Sales Call Taken',
+                                        label: 'Sales Calls Taken',
                                         data: salesCalls
                                     }]
                                 });
                             }, 400);
 
                             setTimeout(() => {
-                                createAnimatedChart('revenueChart', 'bar', {
+                                createAnimatedChart('revenuePerCallChart', 'bar', {
                                     labels: owners,
                                     datasets: [{
-                                        label: 'Revenue ($)',
-                                        data: revenue
+                                        label: 'Revenue per Call ($)',
+                                        data: revenuePerCall
                                     }]
                                 });
                             }, 600);
+
+                            setTimeout(() => {
+                                createAnimatedChart('closedRevenueChart', 'line', {
+                                    labels: owners,
+                                    datasets: [{
+                                        label: 'Closed Revenue ($)',
+                                        data: closedRevenue
+                                    }]
+                                });
+                            }, 800);
 
                             setTimeout(() => {
                                 createAnimatedChart('closeRateChart', 'bar', {
@@ -1016,51 +1026,83 @@
                                         data: closeRate
                                     }]
                                 });
-                            }, 800);
+                            }, 1000);
 
+                            // Process table
+                            const tableElem = doc.querySelector('table');
+                            tableElem.classList.add('table', 'table-striped', 'table-hover', 'fade-in');
+
+                            // Move total row to tfoot
+                            const tbodyRows = tableElem.querySelectorAll('tbody tr');
+                            if (tbodyRows.length > 0) {
+                                const lastRow = tbodyRows[tbodyRows.length - 1];
+                                const firstCell = lastRow.querySelector('td');
+                                if (firstCell && firstCell.innerText.trim().toLowerCase() === 'total') {
+                                    const tfoot = doc.createElement('tfoot');
+                                    tfoot.appendChild(lastRow);
+                                    tableElem.appendChild(tfoot);
+                                }
+                            }
+
+                            tableHtml = tableElem.outerHTML;
+                            
                             statusDiv.html(`
                                 <div class="alert alert-success mb-4">
                                     <i class="fas fa-check-circle me-2"></i>
                                     Data processed successfully! Dashboard updated with latest analytics.
                                 </div>
-                            `).fadeIn(600);
-
-                            $('#data-table').html(tableHtml);
-                            $('#results').fadeIn();
-
-                            setTimeout(() => {
-                                $('#data-table table').DataTable({
-                                    responsive: true,
+                                <div class="table-responsive" id="data-table"></div>
+                            `).fadeIn(600, function() {
+                                $('#data-table').html(tableHtml);
+                                
+                                // Initialize enhanced DataTable
+                                const dataTable = $('#data-table table').DataTable({
+                                    scrollX: true,
+                                    scrollY: '60vh',
+                                    scrollCollapse: true,
+                                    paging: true,
                                     pageLength: 25,
                                     lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
-                                    order: [[1, 'desc']],
-                                    dom: 'Bfrtip',
+                                    fixedHeader: true,
+                                    fixedColumns: {
+                                        leftColumns: 1
+                                    },
+                                    dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+                                         '<"row"<"col-sm-12"B>>' +
+                                         '<"row"<"col-sm-12"tr>>' +
+                                         '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
                                     buttons: [
                                         {
                                             extend: 'copy',
-                                            className: 'btn btn-sm btn-outline-primary'
+                                            className: 'btn btn-sm btn-outline-primary',
+                                            text: '<i class="fas fa-copy"></i> Copy'
                                         },
                                         {
                                             extend: 'csv',
-                                            className: 'btn btn-sm btn-outline-success'
+                                            className: 'btn btn-sm btn-outline-success',
+                                            text: '<i class="fas fa-file-csv"></i> CSV'
                                         },
                                         {
                                             extend: 'excel',
-                                            className: 'btn btn-sm btn-outline-success'
+                                            className: 'btn btn-sm btn-outline-success',
+                                            text: '<i class="fas fa-file-excel"></i> Excel'
                                         },
                                         {
                                             extend: 'pdf',
-                                            className: 'btn btn-sm btn-outline-danger'
+                                            className: 'btn btn-sm btn-outline-danger',
+                                            text: '<i class="fas fa-file-pdf"></i> PDF'
                                         },
                                         {
                                             extend: 'print',
-                                            className: 'btn btn-sm btn-outline-info'
+                                            className: 'btn btn-sm btn-outline-info',
+                                            text: '<i class="fas fa-print"></i> Print'
                                         }
                                     ],
+                                    order: [],
                                     language: {
-                                        search: "_INPUT_",
-                                        searchPlaceholder: "Search data...",
-                                        lengthMenu: "Show _MENU_ entries",
+                                        search: "",
+                                        searchPlaceholder: "Search owners, metrics...",
+                                        lengthMenu: "Show _MENU_ entries per page",
                                         info: "Showing _START_ to _END_ of _TOTAL_ entries",
                                         paginate: {
                                             first: "First",
@@ -1069,9 +1111,32 @@
                                             previous: "Previous"
                                         }
                                     },
+                                    columnDefs: [
+                                        {
+                                            targets: 0,
+                                            className: 'owner-cell'
+                                        },
+                                        {
+                                            targets: '_all',
+                                            render: function(data, type, row, meta) {
+                                                if (type === 'display' && typeof data === 'number') {
+                                                    if (meta.settings.aoColumns[meta.col].sTitle.includes('%')) {
+                                                        return '<span class="percentage-cell">' + data.toFixed(1) + '%</span>';
+                                                    } else if (meta.settings.aoColumns[meta.col].sTitle.includes('$')) {
+                                                        return '<span class="numeric-cell">$' + data.toLocaleString() + '</span>';
+                                                    } else {
+                                                        return '<span class="numeric-cell">' + data.toLocaleString() + '</span>';
+                                                    }
+                                                }
+                                                return data;
+                                            }
+                                        }
+                                    ],
                                     initComplete: function() {
+                                        // Add custom styling to the Total row
                                         $('#data-table table tbody tr:last-child, #data-table table tfoot tr').addClass('table-primary');
 
+                                        // Add search to individual columns
                                         this.api().columns().every(function() {
                                             var column = this;
                                             var title = $(column.header()).text();
@@ -1088,15 +1153,14 @@
                                         });
                                     }
                                 });
-                            }, 1000);
+                            });
                         });
                     } else {
                         $('#status').html(`<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Error: ${response.message}</div>`);
                     }
                 },
-                error: function(xhr, status, error) {
-                    console.error('AJAX Error:', status, error);
-                    $('#status').html('<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Error applying filters. Please try again.</div>');
+                error: function() {
+                    $('#status').html('<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Error applying filters</div>');
                 },
                 complete: function() {
                     hideLoading();
@@ -1104,7 +1168,9 @@
             });
         }
 
+        // Document ready
         $(document).ready(function() {
+            // Add entrance animations
             $('.slide-in-left').each(function(index) {
                 $(this).css('animation-delay', (index * 0.1) + 's');
             });
@@ -1113,17 +1179,15 @@
                 $(this).css('animation-delay', (index * 0.1) + 's');
             });
 
+            // Populate owners dropdown
             populateOwners();
             
-            $('#apply-owners-filter').off('click').on('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
+            // Event handlers
+            $('#apply-owners-filter').click(function() {
                 applyFilters();
             });
 
-            $('#fetch-btn').off('click').on('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
+            $('#fetch-btn').click(function() {
                 showLoading('Fetching fresh data from sources...');
 
                 fetch('/fetch-data', {
@@ -1134,8 +1198,8 @@
                     const statusDiv = $('#status');
                     if (data.success) {
                         statusDiv.html(`<div class="alert alert-success"><i class="fas fa-check-circle me-2"></i>${data.message}</div>`);
-                        populateOwners();
-                    } else {
+                        populateOwners(); // Refresh owners list
+                } else {
                         statusDiv.html(`<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Error: ${data.message}</div>`);
                     }
                 })
@@ -1147,12 +1211,12 @@
                 });
             });
 
-            $('#filter-form').off('submit').on('submit', function(e) {
+            // Form submit handler
+            $('#filter-form').on('submit', function(e) {
                 e.preventDefault();
-                e.stopPropagation();
                 applyFilters();
             });
-        });
+    });
     </script>
 </body>
 </html>
