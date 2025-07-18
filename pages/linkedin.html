@@ -897,28 +897,11 @@
                 });
         }
 
-        $(document).ready(function() {
-            $('.slide-in-left').each(function(index) {
-                $(this).css('animation-delay', (index * 0.1) + 's');
-            });
-            
-            $('.slide-in-right').each(function(index) {
-                $(this).css('animation-delay', (index * 0.1) + 's');
-            });
-
-            populateOwners();
-
-            $('#apply-owners-filter').click(function() {
-                applyFilters();
-            });
-
-            $('#filter-form').on('submit', function(e) {
-                e.preventDefault();
-                applyFilters();
-            });
-        });
-
         function applyFilters() {
+            if ($('#loading-overlay').is(':visible')) {
+                return;
+            }
+            
             showLoading('Processing LinkedIn data with advanced analytics...');
 
             const startDate = $('#start_date').val();
@@ -940,16 +923,19 @@
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(data),
+                timeout: 30000,
                 success: function(response) {
                     if (response.status === 'success') {
                         const statusDiv = $('#status');
                         
                         if ($.fn.DataTable.isDataTable('#data-table table')) {
-                            $('#data-table table').DataTable().destroy();
+                            $('#data-table table').DataTable().clear().destroy();
                         }
                         
                         Object.values(chartInstances).forEach(chart => {
-                            if (chart) chart.destroy();
+                            if (chart && typeof chart.destroy === 'function') {
+                                chart.destroy();
+                            }
                         });
                         chartInstances = {};
 
@@ -969,11 +955,11 @@
                             const owners = chartData.map(row => row[headers.indexOf('Owner')]);
                             const newCalls = chartData.map(row => parseFloat(row[headers.indexOf('New Calls Booked')]) || 0);
                             const salesCalls = chartData.map(row => parseFloat(row[headers.indexOf('Sales Call Taken')]) || 0);
-                            const revenuePerCall = chartData.map(row => parseFloat(row[headers.indexOf('Revenue Per Call $')]) || 0);
-                            const closedRevenue = chartData.map(row => parseFloat(row[headers.indexOf('Closed Revenue $')]) || 0);
-                            const closeRate = chartData.map(row => parseFloat(row[headers.indexOf('Close Rate %')]) || 0);
-
-                            $('#charts-container').fadeIn(600);
+                            const revenue = chartData.map(row => {
+                                const value = row[headers.indexOf('Revenue')];
+                                return parseFloat(value?.replace(/[$,]/g, '')) || 0;
+                            });
+                            const closeRate = chartData.map(row => parseFloat(row[headers.indexOf('Close Rate')]) || 0);
 
                             setTimeout(() => {
                                 createAnimatedChart('newCallsChart', 'bar', {
@@ -986,34 +972,24 @@
                             }, 200);
 
                             setTimeout(() => {
-                                createAnimatedChart('salesCallsChart', 'line', {
+                                createAnimatedChart('salesCallsChart', 'bar', {
                                     labels: owners,
                                     datasets: [{
-                                        label: 'Sales Calls Taken',
+                                        label: 'Sales Call Taken',
                                         data: salesCalls
                                     }]
                                 });
                             }, 400);
 
                             setTimeout(() => {
-                                createAnimatedChart('revenuePerCallChart', 'bar', {
+                                createAnimatedChart('revenueChart', 'bar', {
                                     labels: owners,
                                     datasets: [{
-                                        label: 'Revenue per Call ($)',
-                                        data: revenuePerCall
+                                        label: 'Revenue ($)',
+                                        data: revenue
                                     }]
                                 });
                             }, 600);
-
-                            setTimeout(() => {
-                                createAnimatedChart('closedRevenueChart', 'line', {
-                                    labels: owners,
-                                    datasets: [{
-                                        label: 'Closed Revenue ($)',
-                                        data: closedRevenue
-                                    }]
-                                });
-                            }, 800);
 
                             setTimeout(() => {
                                 createAnimatedChart('closeRateChart', 'bar', {
@@ -1023,80 +999,51 @@
                                         data: closeRate
                                     }]
                                 });
-                            }, 1000);
+                            }, 800);
 
-                            const tableElem = doc.querySelector('table');
-                            tableElem.classList.add('table', 'table-striped', 'table-hover', 'fade-in');
-
-                            const tbodyRows = tableElem.querySelectorAll('tbody tr');
-                            if (tbodyRows.length > 0) {
-                                const lastRow = tbodyRows[tbodyRows.length - 1];
-                                const firstCell = lastRow.querySelector('td');
-                                if (firstCell && firstCell.innerText.trim().toLowerCase() === 'total') {
-                                    const tfoot = doc.createElement('tfoot');
-                                    tfoot.appendChild(lastRow);
-                                    tableElem.appendChild(tfoot);
-                                }
-                            }
-
-                            tableHtml = tableElem.outerHTML;
-                            
                             statusDiv.html(`
                                 <div class="alert alert-success mb-4">
                                     <i class="fab fa-linkedin me-2"></i>
                                     LinkedIn data processed successfully! Dashboard updated with latest analytics.
                                 </div>
-                                <div class="table-responsive" id="data-table"></div>
-                            `).fadeIn(600, function() {
-                                $('#data-table').html(tableHtml);
-                                
-                                const dataTable = $('#data-table table').DataTable({
-                                    scrollX: true,
-                                    scrollY: '60vh',
-                                    scrollCollapse: true,
-                                    paging: true,
+                            `).fadeIn(600);
+
+                            $('#data-table').html(tableHtml);
+                            $('#results').fadeIn();
+
+                            setTimeout(() => {
+                                $('#data-table table').DataTable({
+                                    responsive: true,
                                     pageLength: 25,
                                     lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
-                                    fixedHeader: true,
-                                    fixedColumns: {
-                                        leftColumns: 1
-                                    },
-                                    dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
-                                         '<"row"<"col-sm-12"B>>' +
-                                         '<"row"<"col-sm-12"tr>>' +
-                                         '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+                                    order: [[1, 'desc']],
+                                    dom: 'Bfrtip',
                                     buttons: [
                                         {
                                             extend: 'copy',
-                                            className: 'btn btn-sm btn-outline-primary',
-                                            text: '<i class="fas fa-copy"></i> Copy'
+                                            className: 'btn btn-sm btn-outline-primary'
                                         },
                                         {
                                             extend: 'csv',
-                                            className: 'btn btn-sm btn-outline-success',
-                                            text: '<i class="fas fa-file-csv"></i> CSV'
+                                            className: 'btn btn-sm btn-outline-success'
                                         },
                                         {
                                             extend: 'excel',
-                                            className: 'btn btn-sm btn-outline-success',
-                                            text: '<i class="fas fa-file-excel"></i> Excel'
+                                            className: 'btn btn-sm btn-outline-success'
                                         },
                                         {
                                             extend: 'pdf',
-                                            className: 'btn btn-sm btn-outline-danger',
-                                            text: '<i class="fas fa-file-pdf"></i> PDF'
+                                            className: 'btn btn-sm btn-outline-danger'
                                         },
                                         {
                                             extend: 'print',
-                                            className: 'btn btn-sm btn-outline-info',
-                                            text: '<i class="fas fa-print"></i> Print'
+                                            className: 'btn btn-sm btn-outline-info'
                                         }
                                     ],
-                                    order: [],
                                     language: {
-                                        search: "",
-                                        searchPlaceholder: "Search owners, metrics...",
-                                        lengthMenu: "Show _MENU_ entries per page",
+                                        search: "_INPUT_",
+                                        searchPlaceholder: "Search data...",
+                                        lengthMenu: "Show _MENU_ entries",
                                         info: "Showing _START_ to _END_ of _TOTAL_ entries",
                                         paginate: {
                                             first: "First",
@@ -1105,32 +1052,6 @@
                                             previous: "Previous"
                                         }
                                     },
-                                    columnDefs: [
-                                        {
-                                            targets: 0,
-                                            className: 'owner-cell',
-                                            createdCell: function(td, cellData, rowData, row, col) {
-                                                if (cellData && cellData.toString().toLowerCase() === 'total') {
-                                                    $(td).removeClass('owner-cell');
-                                                }
-                                            }
-                                        },
-                                        {
-                                            targets: '_all',
-                                            render: function(data, type, row, meta) {
-                                                if (type === 'display' && typeof data === 'number') {
-                                                    if (meta.settings.aoColumns[meta.col].sTitle.includes('%')) {
-                                                        return '<span class="percentage-cell">' + data.toFixed(1) + '%</span>';
-                                                    } else if (meta.settings.aoColumns[meta.col].sTitle.includes('$')) {
-                                                        return '<span class="numeric-cell">$' + data.toLocaleString() + '</span>';
-                                                    } else {
-                                                        return '<span class="numeric-cell">' + data.toLocaleString() + '</span>';
-                                                    }
-                                                }
-                                                return data;
-                                            }
-                                        }
-                                    ],
                                     initComplete: function() {
                                         $('#data-table table tbody tr:last-child, #data-table table tfoot tr').addClass('table-primary');
 
@@ -1150,20 +1071,45 @@
                                         });
                                     }
                                 });
-                            });
+                            }, 1000);
                         });
                     } else {
                         $('#status').html(`<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Error: ${response.message}</div>`);
                     }
                 },
-                error: function() {
-                    $('#status').html('<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Error applying filters</div>');
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', status, error);
+                    $('#status').html('<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Error applying filters. Please try again.</div>');
                 },
                 complete: function() {
                     hideLoading();
                 }
             });
         }
+
+        $(document).ready(function() {
+            $('.slide-in-left').each(function(index) {
+                $(this).css('animation-delay', (index * 0.1) + 's');
+            });
+            
+            $('.slide-in-right').each(function(index) {
+                $(this).css('animation-delay', (index * 0.1) + 's');
+            });
+
+            populateOwners();
+
+            $('#apply-owners-filter').off('click').on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                applyFilters();
+            });
+
+            $('#filter-form').off('submit').on('submit', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                applyFilters();
+            });
+        });
     </script>
 </body>
 </html>

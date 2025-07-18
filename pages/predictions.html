@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -728,6 +727,166 @@
             color: white;
         }
 
+        .training-logs-container {
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border: 1px solid #e2e3e5;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            color: #4a5568;
+            font-family: 'Monaco', 'Consolas', 'Monospace';
+            line-height: 1.4;
+        }
+
+        .log-entry {
+            margin-bottom: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .log-timestamp {
+            font-weight: 600;
+            color: #6c757d;
+        }
+
+        .log-message {
+            font-weight: 400;
+            color: #4a5568;
+        }
+
+        .custom-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            display: none;
+            z-index: 10000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .custom-modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content-custom {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+            margin: 20px;
+            overflow: hidden;
+            transform: scale(0.8);
+            animation: modalSlideIn 0.3s ease forwards;
+        }
+
+        @keyframes modalSlideIn {
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .modal-header-custom {
+            background: var(--warning-gradient);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .modal-header-custom .modal-icon {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .modal-body-custom {
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .modal-body-custom h5 {
+            color: #2d3748;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .modal-body-custom p {
+            color: #4a5568;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .training-info {
+            background: #f7fafc;
+            border-left: 4px solid #ed8936;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+        }
+
+        .training-info ul {
+            margin: 0;
+            padding-left: 1rem;
+            text-align: left;
+        }
+
+        .training-info li {
+            margin-bottom: 0.5rem;
+            color: #4a5568;
+            font-size: 0.9rem;
+        }
+
+        .modal-footer-custom {
+            padding: 1.5rem;
+            background: #f8fafc;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            min-width: 120px;
+        }
+
+        .modal-btn-primary {
+            background: var(--warning-gradient);
+            color: white;
+        }
+
+        .modal-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(237, 137, 54, 0.3);
+        }
+
+        .modal-btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .modal-btn-secondary:hover {
+            background: #cbd5e0;
+            transform: translateY(-2px);
+        }
+
         @media (max-width: 768px) {
             .table-controls {
                 flex-direction: column;
@@ -810,16 +969,83 @@
                 <div class="card mb-4 slide-in-left">
                     <div class="card-body">
                         <h3 class="card-title">
-                            <i class="fas fa-crystal-ball"></i>
-                            AI Lead Win/Loss Predictions
+                            <i class="fas fa-brain"></i>
+                            LeadNet AI Prediction System
                         </h3>
-                        <p class="lead">Advanced machine learning predictions for scheduled leads with confidence scoring</p>
-                        <button id="generate-predictions-btn" class="btn btn-primary">
-                            <i class="fas fa-magic me-2"></i>
-                            Generate New Predictions
-                        </button>
+                        <p class="lead">Advanced Wide & Deep Neural Network for lead win/loss predictions with confidence scoring</p>
+                        
+                        <div class="model-controls mb-3">
+                            <button id="check-model-status-btn" class="btn btn-success me-2">
+                                <i class="fas fa-search me-2"></i>
+                                Check Model Status
+                            </button>
+                            <button id="train-model-btn" class="btn btn-warning me-2">
+                                <i class="fas fa-dumbbell me-2"></i>
+                                Train New Model
+                            </button>
+                            <button id="generate-predictions-btn" class="btn btn-primary">
+                                <i class="fas fa-magic me-2"></i>
+                                Generate Predictions
+                            </button>
+                            <button id="help-toggle-btn" class="btn btn-outline-info ms-2">
+                                <i class="fas fa-question-circle me-2"></i>
+                                Help
+                            </button>
+                        </div>
+                        
+                        <!-- Help Information Panel -->
+                        <div id="help-panel" class="alert alert-info" style="display: none;">
+                            <h6><i class="fas fa-info-circle me-2"></i>How to Use LeadNet AI Predictions</h6>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <h6><i class="fas fa-search text-success"></i> Check Status</h6>
+                                    <p><small>Verify if your AI model is trained and ready for predictions. Shows data availability and model health.</small></p>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6><i class="fas fa-dumbbell text-warning"></i> Train Model</h6>
+                                    <p><small>Train a new AI model using your historical won/lost lead data. Takes 3-5 minutes but improves accuracy.</small></p>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6><i class="fas fa-magic text-primary"></i> Generate Predictions</h6>
+                                    <p><small>Analyze your scheduled leads and get AI predictions with confidence scores for better prioritization.</small></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="model-status-card" class="alert" style="display: none;">
+                            <h6><i class="fas fa-info-circle me-2"></i>Model Status</h6>
+                            <div id="model-status-content"></div>
+                        </div>
+                        
                         <div class="mt-3">
-                            <small class="text-muted" id="model-info"></small>
+                            <small class="text-muted" id="model-info">LeadNet v4 - TensorFlow Wide & Deep Neural Network</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Training Progress Section -->
+        <div class="row" id="training-progress-section" style="display: none;">
+            <div class="col-12">
+                <div class="card mb-4 slide-in-right">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-chart-line me-2"></i>
+                            Training Progress
+                        </h5>
+                        <div class="progress mb-3" style="height: 25px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                 id="training-progress-bar" 
+                                 role="progressbar" 
+                                 style="width: 0%">
+                                <span id="progress-text">Initializing...</span>
+                            </div>
+                        </div>
+                        <div id="training-logs" class="training-logs-container">
+                            <div class="log-entry">
+                                <span class="log-timestamp">Ready to start training...</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -828,46 +1054,67 @@
 
         <div class="row" id="stats-section" style="display: none;">
             <div class="col-lg-3 col-md-6 mb-4">
-                <div class="stats-card total slide-in-left">
+                <div class="stats-card total slide-in-left" data-bs-toggle="tooltip" data-bs-placement="top" title="Total number of leads analyzed by the AI model from your scheduled leads">
                     <div class="card-body text-center">
                         <div class="stats-number total" id="total-leads">
                             <i class="fas fa-users stats-icon"></i>
                             0
                         </div>
                         <h6 class="text-muted mb-0">Total Leads</h6>
+                        <small class="text-muted"><i class="fas fa-info-circle"></i> Scheduled leads analyzed</small>
                     </div>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6 mb-4">
-                <div class="stats-card won slide-in-left" style="animation-delay: 0.1s">
+                <div class="stats-card won slide-in-left" style="animation-delay: 0.1s" data-bs-toggle="tooltip" data-bs-placement="top" title="Leads predicted to convert into sales based on AI analysis. Focus your efforts on these high-potential leads.">
                     <div class="card-body text-center">
                         <div class="stats-number won" id="predicted-won">
                             <i class="fas fa-trophy stats-icon"></i>
                             0
                         </div>
                         <h6 class="text-muted mb-0">Predicted Won</h6>
+                        <small class="text-success"><i class="fas fa-chart-line"></i> High conversion potential</small>
                     </div>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6 mb-4">
-                <div class="stats-card lost slide-in-left" style="animation-delay: 0.2s">
+                <div class="stats-card lost slide-in-left" style="animation-delay: 0.2s" data-bs-toggle="tooltip" data-bs-placement="top" title="Leads predicted unlikely to convert. Consider adjusting your approach or deprioritizing these leads.">
                     <div class="card-body text-center">
                         <div class="stats-number lost" id="predicted-lost">
                             <i class="fas fa-times-circle stats-icon"></i>
                             0
                         </div>
                         <h6 class="text-muted mb-0">Predicted Lost</h6>
+                        <small class="text-danger"><i class="fas fa-exclamation-triangle"></i> Low conversion potential</small>
                     </div>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6 mb-4">
-                <div class="stats-card confidence slide-in-left" style="animation-delay: 0.3s">
+                <div class="stats-card confidence slide-in-left" style="animation-delay: 0.3s" data-bs-toggle="tooltip" data-bs-placement="top" title="Average confidence score of AI predictions. Higher percentages indicate more reliable predictions.">
                     <div class="card-body text-center">
                         <div class="stats-number confidence" id="avg-confidence">
                             <i class="fas fa-percentage stats-icon"></i>
                             0%
                         </div>
                         <h6 class="text-muted mb-0">Avg Confidence</h6>
+                        <small class="text-warning"><i class="fas fa-brain"></i> AI prediction reliability</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Insights Panel -->
+        <div class="row" id="insights-section" style="display: none;">
+            <div class="col-12">
+                <div class="card mb-4 fade-in">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            AI Insights & Recommendations
+                        </h5>
+                        <div id="insights-content" class="row">
+                            <!-- Dynamic insights will be populated here -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -879,6 +1126,9 @@
                     <div class="chart-header">
                         <i class="fas fa-chart-pie me-2"></i>
                         Prediction Distribution
+                        <button class="btn btn-sm btn-outline-light ms-2" data-bs-toggle="tooltip" data-bs-placement="top" title="This pie chart shows the ratio of leads predicted to win vs lose. A balanced distribution indicates diverse lead quality.">
+                            <i class="fas fa-info-circle"></i>
+                        </button>
                     </div>
                     <div class="chart-container">
                         <canvas id="predictionChart"></canvas>
@@ -890,6 +1140,9 @@
                     <div class="chart-header">
                         <i class="fas fa-chart-bar me-2"></i>
                         Confidence Levels
+                        <button class="btn btn-sm btn-outline-light ms-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Shows how confident the AI is in its predictions. More high-confidence predictions mean more reliable results.">
+                            <i class="fas fa-info-circle"></i>
+                        </button>
                     </div>
                     <div class="chart-container">
                         <canvas id="confidenceChart"></canvas>
@@ -901,6 +1154,9 @@
                     <div class="chart-header">
                         <i class="fas fa-chart-line me-2"></i>
                         Prediction Confidence by Owner
+                        <button class="btn btn-sm btn-outline-light ms-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Average confidence scores for each lead owner's assigned leads. Helps identify which team members have higher-quality lead assignments.">
+                            <i class="fas fa-info-circle"></i>
+                        </button>
                     </div>
                     <div class="chart-container">
                         <canvas id="ownerChart"></canvas>
@@ -916,11 +1172,22 @@
                         <h5 class="card-title">
                             <i class="fas fa-table me-2"></i>
                             Prediction Results
+                            <button class="btn btn-sm btn-outline-primary ms-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Detailed table showing AI predictions for each lead. Use filters and sorting to prioritize your sales efforts.">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
                         </h5>
                         <div id="predictions-status">
                             <div class="alert alert-info">
                                 <i class="fas fa-info-circle me-2"></i>
                                 Click "Generate New Predictions" to get the latest AI predictions for scheduled leads.
+                                <br><small class="mt-2 d-block">
+                                    <strong>How to read predictions:</strong>
+                                    <span class="badge bg-success ms-2">Won</span> = High conversion probability
+                                    <span class="badge bg-danger ms-2">Lost</span> = Low conversion probability
+                                    <span class="badge bg-warning ms-2">80%+</span> = High confidence
+                                    <span class="badge bg-secondary ms-2">60-79%</span> = Medium confidence
+                                    <span class="badge bg-dark ms-2">&lt;60%</span> = Low confidence
+                                </small>
                             </div>
                         </div>
                         <div id="predictions-table-container" style="display: none;">
@@ -933,10 +1200,10 @@
                                     <div class="pagination-info" id="pagination-info"></div>
                                     <div class="pagination-controls" id="pagination-controls"></div>
                                     <div class="export-buttons">
-                                        <button class="export-btn" id="export-csv">
+                                        <button class="export-btn" id="export-csv" data-bs-toggle="tooltip" data-bs-placement="top" title="Download predictions as CSV file for Excel analysis">
                                             <i class="fas fa-file-csv me-1"></i>CSV
                                         </button>
-                                        <button class="export-btn" id="export-json">
+                                        <button class="export-btn" id="export-json" data-bs-toggle="tooltip" data-bs-placement="top" title="Download predictions as JSON file for API integration">
                                             <i class="fas fa-file-code me-1"></i>JSON
                                         </button>
                                     </div>
@@ -957,6 +1224,42 @@
             <div class="spinner-ring"></div>
             <h4 id="loading-text">Generating AI predictions...</h4>
             <p>Please wait while our machine learning model analyzes your leads</p>
+        </div>
+    </div>
+
+    <!-- Custom Training Confirmation Modal -->
+    <div class="custom-modal" id="training-confirmation-modal">
+        <div class="modal-content-custom">
+            <div class="modal-header-custom">
+                <div class="modal-icon">
+                    <i class="fas fa-dumbbell"></i>
+                </div>
+                <h4 class="mb-0">Train New AI Model</h4>
+            </div>
+            <div class="modal-body-custom">
+                <h5>Start LeadNet Model Training?</h5>
+                <p>This will create a new AI model using your latest historical lead data to improve prediction accuracy.</p>
+                
+                <div class="training-info">
+                    <h6><i class="fas fa-info-circle me-2"></i>What happens during training:</h6>
+                    <ul>
+                        <li><strong>Data Analysis:</strong> Process your won/lost lead history</li>
+                        <li><strong>Model Creation:</strong> Build neural network with 5-fold cross-validation</li>
+                        <li><strong>Duration:</strong> Approximately 3-5 minutes</li>
+                        <li><strong>Accuracy:</strong> Improved predictions based on your latest data</li>
+                    </ul>
+                </div>
+                
+                <p><strong>Note:</strong> You can monitor the training progress in real-time. The page will remain accessible during training.</p>
+            </div>
+            <div class="modal-footer-custom">
+                <button type="button" class="modal-btn modal-btn-secondary" id="cancel-training-btn">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </button>
+                <button type="button" class="modal-btn modal-btn-primary" id="confirm-training-btn">
+                    <i class="fas fa-play me-2"></i>Start Training
+                </button>
+            </div>
         </div>
     </div>
 
@@ -1093,20 +1396,106 @@
 
         function updateStats(data) {
             const totalLeads = data.length;
-            const wonPredictions = data.filter(row => row.prediction === 'Won').length;
+            const wonPredictions = data.filter(row => row.prediction === 'won').length;
             const lostPredictions = totalLeads - wonPredictions;
             const avgConfidence = data.reduce((sum, row) => sum + row.prediction_confidence, 0) / totalLeads;
 
             $('#stats-section').fadeIn(800);
+            $('#insights-section').fadeIn(1000);
             
-            animateValue('#total-leads', 0, totalLeads, 1000);
-            animateValue('#predicted-won', 0, wonPredictions, 1200);
-            animateValue('#predicted-lost', 0, lostPredictions, 1400);
-            animateValue('#avg-confidence', 0, Math.round(avgConfidence * 100), 1600, '%');
+            // Stagger the animations with delays
+            setTimeout(() => animateValue('#total-leads', 0, totalLeads, 1000), 200);
+            setTimeout(() => animateValue('#predicted-won', 0, wonPredictions, 1000), 400);
+            setTimeout(() => animateValue('#predicted-lost', 0, lostPredictions, 1000), 600);
+            setTimeout(() => animateValue('#avg-confidence', 0, Math.round(avgConfidence * 100), 1000, '%'), 800);
+            
+            // Generate insights after animations complete
+            setTimeout(() => generateInsights(data, totalLeads, wonPredictions, avgConfidence), 1200);
+        }
+
+        function generateInsights(data, totalLeads, wonPredictions, avgConfidence) {
+            const winRate = (wonPredictions / totalLeads * 100).toFixed(1);
+            const highConfidenceLeads = data.filter(row => row.prediction_confidence >= 0.8).length;
+            const lowConfidenceLeads = data.filter(row => row.prediction_confidence < 0.6).length;
+            
+            // Group by owner for insights
+            const ownerStats = {};
+            data.forEach(row => {
+                const owner = row.Owner || 'Unknown';
+                if (!ownerStats[owner]) {
+                    ownerStats[owner] = { total: 0, won: 0, avgConfidence: 0, confidenceSum: 0 };
+                }
+                ownerStats[owner].total++;
+                if (row.prediction === 'won') ownerStats[owner].won++;
+                ownerStats[owner].confidenceSum += row.prediction_confidence;
+                ownerStats[owner].avgConfidence = ownerStats[owner].confidenceSum / ownerStats[owner].total;
+            });
+            
+            const bestPerformer = Object.keys(ownerStats).reduce((best, owner) => 
+                ownerStats[owner].avgConfidence > ownerStats[best].avgConfidence ? owner : best
+            );
+            
+            let insightsHtml = '';
+            
+            // Win Rate Insight
+            let winRateClass = winRate >= 60 ? 'success' : winRate >= 40 ? 'warning' : 'danger';
+            let winRateIcon = winRate >= 60 ? 'fa-thumbs-up' : winRate >= 40 ? 'fa-balance-scale' : 'fa-thumbs-down';
+            
+            insightsHtml += `
+                <div class="col-md-4 mb-3">
+                    <div class="alert alert-${winRateClass}">
+                        <h6><i class="fas ${winRateIcon} me-2"></i>Predicted Win Rate</h6>
+                        <p class="mb-0">${winRate}% of leads predicted to convert</p>
+                        <small>${winRate >= 60 ? 'Strong lead quality' : winRate >= 40 ? 'Average lead quality' : 'Focus on lead qualification'}</small>
+                    </div>
+                </div>
+            `;
+            
+            // Confidence Insight
+            let confidenceClass = avgConfidence >= 0.8 ? 'success' : avgConfidence >= 0.6 ? 'warning' : 'danger';
+            let confidenceIcon = avgConfidence >= 0.8 ? 'fa-shield-alt' : avgConfidence >= 0.6 ? 'fa-exclamation-triangle' : 'fa-question-circle';
+            
+            insightsHtml += `
+                <div class="col-md-4 mb-3">
+                    <div class="alert alert-${confidenceClass}">
+                        <h6><i class="fas ${confidenceIcon} me-2"></i>Prediction Reliability</h6>
+                        <p class="mb-0">${(avgConfidence * 100).toFixed(1)}% average confidence</p>
+                        <small>${highConfidenceLeads} high-confidence predictions</small>
+                    </div>
+                </div>
+            `;
+            
+            // Best Performer Insight
+            insightsHtml += `
+                <div class="col-md-4 mb-3">
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-star me-2"></i>Top Performer</h6>
+                        <p class="mb-0">${bestPerformer}</p>
+                        <small>${(ownerStats[bestPerformer].avgConfidence * 100).toFixed(1)}% avg confidence score</small>
+                    </div>
+                </div>
+            `;
+            
+            // Action Items
+            insightsHtml += `
+                <div class="col-12">
+                    <div class="alert alert-light">
+                        <h6><i class="fas fa-tasks me-2"></i>Recommended Actions</h6>
+                        <ul class="mb-0">
+                            ${wonPredictions > 0 ? `<li><strong>Priority Focus:</strong> Contact the ${wonPredictions} leads predicted to win first</li>` : ''}
+                            ${highConfidenceLeads > 0 ? `<li><strong>High Confidence:</strong> ${highConfidenceLeads} leads have >80% confidence - allocate top resources</li>` : ''}
+                            ${lowConfidenceLeads > 0 ? `<li><strong>Review Required:</strong> ${lowConfidenceLeads} leads have low confidence - verify data quality</li>` : ''}
+                            <li><strong>Model Performance:</strong> ${avgConfidence >= 0.7 ? 'Model is performing well' : 'Consider retraining with more data'}</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+            
+            $('#insights-content').html(insightsHtml);
         }
 
         function createCharts(data) {
-            const wonCount = data.filter(row => row.prediction === 'Won').length;
+            const wonCount = data.filter(row => row.prediction === 'won').length;
             const lostCount = data.length - wonCount;
 
             const predictionData = {
@@ -1193,19 +1582,47 @@
 
         function animateValue(selector, start, end, duration, suffix = '') {
             const element = $(selector);
-            const range = end - start;
-            const increment = end > start ? 1 : -1;
-            const stepTime = Math.abs(Math.floor(duration / range));
             
-            let current = start;
-            const timer = setInterval(function() {
-                current += increment;
-                const displayValue = suffix ? current + suffix : current;
-                element.html(element.html().replace(/\d+%?/, displayValue));
-                if (current === end) {
-                    clearInterval(timer);
+            // Store the icon element
+            const icon = element.find('i').first();
+            
+            // Function to set the display value cleanly
+            function setDisplayValue(value) {
+                const displayValue = suffix ? value + suffix : value;
+                element.empty().append(icon.clone()).append(' ' + displayValue);
+            }
+            
+            if (start === end) {
+                setDisplayValue(end);
+                return;
+            }
+            
+            // Set initial value
+            setDisplayValue(start);
+            
+            const startTime = performance.now();
+            let animationId;
+            
+            function updateValue(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Use easing function for smooth animation
+                const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+                const current = Math.round(start + ((end - start) * easeOutQuart));
+                
+                // Update display value
+                setDisplayValue(current);
+                
+                if (progress < 1) {
+                    animationId = requestAnimationFrame(updateValue);
+                } else {
+                    // Ensure final value is set
+                    setDisplayValue(end);
                 }
-            }, stepTime);
+            }
+            
+            animationId = requestAnimationFrame(updateValue);
         }
 
         function sortData(column) {
@@ -1323,7 +1740,7 @@
                     if (d.header === 'prediction_confidence') {
                         cell.html(formatConfidence(d.value));
                     } else if (d.header === 'prediction') {
-                        const predClass = d.value === 'Won' ? 'prediction-won' : 'prediction-lost';
+                        const predClass = d.value === 'won' ? 'prediction-won' : 'prediction-lost';
                         cell.html(`<span class="prediction-cell ${predClass}">${d.value}</span>`);
                     } else {
                         cell.text(d.value || '');
@@ -1401,21 +1818,21 @@
         }
 
         function loadPredictions() {
-            showLoading();
+            showLoading('Generating LeadNet predictions...');
             
             $.ajax({
-                url: '/generate_predictions',
+                url: '/generate_leadnet_predictions',
                 type: 'POST',
                 success: function(response) {
                     if (response.status === 'success') {
                         $('#predictions-status').html(`
                             <div class="alert alert-success">
                                 <i class="fas fa-check-circle me-2"></i>
-                                AI predictions generated successfully! Model: ${response.model_info}
+                                LeadNet predictions generated successfully! Model: ${response.model_info}
                             </div>
                         `);
                         
-                        $('#model-info').text(`Using ML model: ${response.model_info}`);
+                        $('#model-info').text(`Using: ${response.model_info}`);
                         
                         if (response.data && response.data.length > 0) {
                             currentData = response.data;
@@ -1459,9 +1876,159 @@
             });
         }
 
+        function checkModelStatus() {
+            $.ajax({
+                url: '/check_model_status',
+                type: 'GET',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        const status = response.model_status;
+                        let statusHtml = '';
+                        
+                        if (status.model_trained) {
+                            statusHtml += `<div class="text-success"><i class="fas fa-check me-2"></i>Model trained and ready</div>`;
+                            statusHtml += `<small>Model size: ${(status.model_size / 1024 / 1024).toFixed(2)} MB</small><br>`;
+                        } else {
+                            statusHtml += `<div class="text-warning"><i class="fas fa-exclamation me-2"></i>No trained model found</div>`;
+                        }
+                        
+                        if (status.training_data_available) {
+                            statusHtml += `<div class="text-success"><i class="fas fa-check me-2"></i>Training data available</div>`;
+                        } else {
+                            statusHtml += `<div class="text-danger"><i class="fas fa-times me-2"></i>Training data not available</div>`;
+                        }
+                        
+                        if (status.prediction_data_available) {
+                            statusHtml += `<div class="text-success"><i class="fas fa-check me-2"></i>Scheduled leads available for prediction</div>`;
+                        } else {
+                            statusHtml += `<div class="text-warning"><i class="fas fa-exclamation me-2"></i>No scheduled leads found</div>`;
+                        }
+                        
+                        $('#model-status-content').html(statusHtml);
+                        $('#model-status-card').removeClass('alert-success alert-warning alert-danger');
+                        
+                        if (status.model_trained && status.prediction_data_available) {
+                            $('#model-status-card').addClass('alert-success').show();
+                        } else if (status.training_data_available) {
+                            $('#model-status-card').addClass('alert-warning').show();
+                        } else {
+                            $('#model-status-card').addClass('alert-danger').show();
+                        }
+                    }
+                },
+                error: function() {
+                    $('#model-status-content').html('<div class="text-danger">Error checking model status</div>');
+                    $('#model-status-card').addClass('alert-danger').show();
+                }
+            });
+        }
+
+        function trainModel() {
+            // Don't show the loading overlay during training - let users see the progress
+            $('#training-progress-section').slideDown();
+            $('#training-logs').empty();
+            
+            let progressInterval;
+            let progressValue = 0;
+            
+            function updateProgressBar(value, text) {
+                $('#training-progress-bar').css('width', value + '%');
+                $('#progress-text').text(text);
+            }
+            
+            function addLogEntry(message, data) {
+                const timestamp = new Date().toLocaleTimeString();
+                const logHtml = `
+                    <div class="log-entry">
+                        <span class="log-timestamp">[${timestamp}]</span>
+                        <span class="log-message">${message}</span>
+                        ${data ? `<div style="margin-left: 2rem; font-size: 0.8rem; color: #6c757d;">${JSON.stringify(data)}</div>` : ''}
+                    </div>
+                `;
+                $('#training-logs').append(logHtml);
+                $('#training-logs').scrollTop($('#training-logs')[0].scrollHeight);
+            }
+            
+            addLogEntry('Starting LeadNet model training...');
+            updateProgressBar(5, 'Loading training data...');
+            
+            progressInterval = setInterval(() => {
+                if (progressValue < 90) {
+                    progressValue += Math.random() * 10;
+                    updateProgressBar(progressValue, 'Training in progress...');
+                }
+            }, 2000);
+            
+            function fetchTrainingProgress() {
+                $.ajax({
+                    url: '/get_training_progress',
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.status === 'success' && response.progress) {
+                            const latestEntries = response.progress.slice(-5);
+                            latestEntries.forEach(entry => {
+                                addLogEntry(entry.message, entry.data);
+                            });
+                        }
+                    }
+                });
+            }
+            
+            const progressFetchInterval = setInterval(fetchTrainingProgress, 3000);
+            
+            $.ajax({
+                url: '/train_leadnet_model',
+                type: 'POST',
+                timeout: 300000, // 5 minutes timeout
+                success: function(response) {
+                    clearInterval(progressInterval);
+                    clearInterval(progressFetchInterval);
+                    
+                    if (response.status === 'success') {
+                        updateProgressBar(100, 'Training completed!');
+                        addLogEntry('Model training completed successfully!', {
+                            'Model Path': response.model_path,
+                            'Data Samples': response.data_samples,
+                            'Metrics': response.metrics
+                        });
+                        
+                        setTimeout(() => {
+                            $('#training-progress-section').slideUp();
+                            
+                            $('#predictions-status').html(`
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    Model trained successfully! You can now generate predictions.
+                                </div>
+                            `);
+                            
+                            checkModelStatus();
+                        }, 2000);
+                    } else {
+                        updateProgressBar(0, 'Training failed');
+                        addLogEntry('Training failed: ' + response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    clearInterval(progressInterval);
+                    clearInterval(progressFetchInterval);
+                    updateProgressBar(0, 'Training failed');
+                    addLogEntry('Training error: ' + error);
+                }
+            });
+        }
+
         $(document).ready(function() {
             $('#generate-predictions-btn').click(function() {
                 loadPredictions();
+            });
+
+            $('#check-model-status-btn').click(function() {
+                checkModelStatus();
+            });
+
+            $('#train-model-btn').click(function() {
+                showTrainingModal();
             });
 
             $('#search-input').on('input', function() {
@@ -1471,8 +2038,90 @@
             $('#export-csv').click(exportToCSV);
             $('#export-json').click(exportToJSON);
             
-            loadPredictions();
+            // Check model status on page load
+            checkModelStatus();
+
+            // Toggle help panel
+            $('#help-toggle-btn').click(function() {
+                $('#help-panel').slideToggle(300);
+                $(this).find('i').toggleClass('fa-question-circle fa-times-circle');
+            });
+
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            })
+            
+            // Show welcome tour for new users
+            showWelcomeTour();
+            
+            // Training modal event handlers
+            $('#cancel-training-btn').click(function() {
+                hideTrainingModal();
+            });
+            
+            $('#confirm-training-btn').click(function() {
+                hideTrainingModal();
+                trainModel();
+            });
+            
+            // Close modal on backdrop click
+            $('#training-confirmation-modal').click(function(e) {
+                if (e.target === this) {
+                    hideTrainingModal();
+                }
+            });
+            
+            // Close modal on escape key
+            $(document).keydown(function(e) {
+                if (e.key === 'Escape' && $('#training-confirmation-modal').hasClass('show')) {
+                    hideTrainingModal();
+                }
+            });
         });
+
+        function showWelcomeTour() {
+            // Check if user has seen the tour before
+            if (!localStorage.getItem('leadnet_tour_shown')) {
+                setTimeout(() => {
+                    const tourHtml = `
+                        <div class="alert alert-primary alert-dismissible fade show" id="welcome-tour">
+                            <h6><i class="fas fa-rocket me-2"></i>Welcome to LeadNet AI Predictions!</h6>
+                            <p class="mb-2">Here's how to get started:</p>
+                            <ol class="mb-3" style="font-size: 0.9rem;">
+                                <li><strong>Check Model Status</strong> - Verify your AI model is ready</li>
+                                <li><strong>Generate Predictions</strong> - Get AI predictions for your scheduled leads</li>
+                                <li><strong>Review Results</strong> - Prioritize leads based on win probability and confidence</li>
+                                <li><strong>Take Action</strong> - Focus on high-confidence "Won" predictions first</li>
+                            </ol>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-primary" onclick="$('#help-panel').slideDown(); $('#welcome-tour').fadeOut();">
+                                    <i class="fas fa-question-circle me-1"></i>Show Detailed Help
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="localStorage.setItem('leadnet_tour_shown', 'true'); $('#welcome-tour').fadeOut();">
+                                    <i class="fas fa-check me-1"></i>Got it, don't show again
+                                </button>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    `;
+                    
+                    $('.container-lg').prepend(tourHtml);
+                    $('#welcome-tour').hide().fadeIn(600);
+                }, 1000);
+            }
+        }
+
+        function showTrainingModal() {
+            $('#training-confirmation-modal').addClass('show');
+            $('body').css('overflow', 'hidden');
+        }
+
+        function hideTrainingModal() {
+            $('#training-confirmation-modal').removeClass('show');
+            $('body').css('overflow', 'auto');
+        }
     </script>
 </body>
 </html>
